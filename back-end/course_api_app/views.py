@@ -4,47 +4,60 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import requests
 import os
+from .models import Course, TeeSet, TeeHole
 
 # from requests_oauthlib import OAuth1
+def save_courses(api_data):
+    # This function can be used to fetch courses from the external API
+    # and save them to the database if needed.
+    course_list = api_data.get("courses", [])
+    for course_data in course_list:
+        course, _ = Course.objects.update_or_create(
+            course_id=course_data["id"],
+            defaults={
+                "club_name": course_data["club_name"],
+                "course_name": course_data["course_name"],
+                "address": api_data["location"]["address"],
+                "city": api_data["location"]["city"],
+                "state": api_data["location"]["state"],
+                "country": api_data["location"]["country"],
+                "latitude": api_data["location"]["latitude"],
+                "longitude": api_data["location"]["longitude"],
+            }
+        )
 
+        for gender in ['male', 'female']:
+            tee_sets = api_data["tees"].get(gender, [])
+            for tee_data in tee_sets:
+                tee_set, _ = TeeSet.objects.update_or_create(
+                    course=course,
+                    tee_name=tee_data["tee_name"],
+                    gender=gender,
+                    defaults={
+                        "course_rating": tee_data["course_rating"],
+                        "slope_rating": tee_data["slope_rating"],
+                        "bogey_rating": tee_data["bogey_rating"],
+                        "total_yards": tee_data["total_yards"],
+                        "number_of_holes": tee_data["number_of_holes"],
+                        "par_total": tee_data["par_total"],
+                    }
+                )
+
+                for idx, hole in enumerate(tee_data["holes"], start=1):
+                    TeeHole.objects.update_or_create(
+                        tee_set=tee_set,
+                        hole_number=idx,
+                        defaults={
+                            "par": hole["par"],
+                            "yardage": hole["yardage"],
+                            "handicap": hole["handicap"]
+                        }
+                    )
 
 # Create your views here.
 # view to get 20 nearest golf courses
 # using the golf course api
 # https://golfcourseapi.com/docs/v1/search
-class CourseApiView(APIView):
-    def get(self, request):
-        # Example: Fetching a list of courses from an external API
-        # Authorization: Key <your API key>
-        api_url = "https://api.golfcourseapi.com/v1/search"
-        headers = {"Authorization": f"Key {os.getenv('GOLF_COURSE_API_KEY')}"}
-        params = {
-            "search_query": "Highland",
-            "city": "Elgin",
-        }
-
-        response = requests.get(api_url, headers=headers, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            courses = data.get("courses", [])
-
-            # Extract only the fields we want from each course
-            filtered_courses = []
-            for course in courses:
-                filtered_course = {
-                    "id": course.get("id"),
-                    "club_name": course.get("club_name"),
-                    "course_name": course.get("course_name"),
-                    "address": course.get("location", {}).get("address"),
-                }
-                filtered_courses.append(filtered_course)
-
-            return Response({"courses": filtered_courses}, status=response.status_code)
-        else:
-            return Response(
-                {"error": "Failed to fetch courses"}, status=response.status_code
-            )
-
 
 class SearchCourses(APIView):
     def get(self, request, search_query):
@@ -55,26 +68,24 @@ class SearchCourses(APIView):
         # Add search query as a parameter
         params = {
             "search_query": search_query,
-            # "Location": "chicago"
         }
         # Make a GET request to the external API with the search query
         response = requests.get(api_url, headers=headers, params=params)
 
         if response.status_code == 200:
             data = response.json()
-            courses = data.get("courses", [])
-
-            # Extract only the fields we want from each course
+            save_courses(data)
+            # Filter courses based on the search query
             filtered_courses = []
-            for course in courses:
-                filtered_course = {
-                    "id": course.get("id"),
-                    "club_name": course.get("club_name"),
-                    "course_name": course.get("course_name"),
-                    "address": course.get("location", {}).get("address"),
-                }
-                filtered_courses.append(filtered_course)
-
+            for course in data.get("courses", []):
+                if search_query.lower() in course["course_name"].lower():
+                    filtered_courses.append({
+                        "course_id": course["id"],
+                        "club_name": course["club_name"],
+                        "course_name": course["course_name"],
+                        "address": course["location"]["address"],
+                    })
+            # Return the filtered courses as a response
             return Response({"courses": filtered_courses})
         else:
             return Response(
