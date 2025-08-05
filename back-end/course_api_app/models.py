@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
@@ -32,14 +33,17 @@ class TeeSet(models.Model):
     par_total = models.IntegerField()
 
     def __str__(self):
-        return f"{self.course} - Tee Color: {self.tee_name} ({self.gender})"
+        return f"{self.course.course_name} - Tee Color: {self.tee_name} ({self.gender})"
 
 class TeeHole(models.Model):
     tee_set = models.ForeignKey(TeeSet, on_delete=models.CASCADE, related_name='holes')
-    hole_number = models.IntegerField()
+    hole_number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(18)])
     par = models.IntegerField()
     yardage = models.IntegerField()
     handicap = models.IntegerField()
 
+    class Meta:
+        unique_together = ('tee_set', 'hole_number')
+
     def __str__(self):
-        return f"{self.tee_set.course} - Hole {self.hole_number} ({self.tee_set.tee_name})"
+        return f"{self.tee_set} - Hole {self.hole_number}"

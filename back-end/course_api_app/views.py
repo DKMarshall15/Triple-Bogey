@@ -6,28 +6,35 @@ import requests
 import os
 from .models import Course, TeeSet, TeeHole
 
+
 # from requests_oauthlib import OAuth1
-def save_courses(api_data):
+def save_courses_from_api(api_data):
     # This function can be used to fetch courses from the external API
     # and save them to the database if needed.
+
     course_list = api_data.get("courses", [])
     for course_data in course_list:
+        course_id = course_data["id"]
+        # Check if the course already exists
+        if Course.objects.filter(course_id=course_id).exists():
+            print(f"Course with ID {course_id} already exists.")
+            continue
         course, _ = Course.objects.update_or_create(
             course_id=course_data["id"],
             defaults={
                 "club_name": course_data["club_name"],
                 "course_name": course_data["course_name"],
-                "address": api_data["location"]["address"],
-                "city": api_data["location"]["city"],
-                "state": api_data["location"]["state"],
-                "country": api_data["location"]["country"],
-                "latitude": api_data["location"]["latitude"],
-                "longitude": api_data["location"]["longitude"],
-            }
+                "address": course_data["location"]["address"],
+                "city": course_data["location"]["city"],
+                "state": course_data["location"]["state"],
+                "country": course_data["location"]["country"],
+                "latitude": course_data["location"]["latitude"],
+                "longitude": course_data["location"]["longitude"],
+            },
         )
 
-        for gender in ['male', 'female']:
-            tee_sets = api_data["tees"].get(gender, [])
+        for gender in ["male", "female"]:
+            tee_sets = course_data["tees"].get(gender, [])
             for tee_data in tee_sets:
                 tee_set, _ = TeeSet.objects.update_or_create(
                     course=course,
@@ -40,7 +47,7 @@ def save_courses(api_data):
                         "total_yards": tee_data["total_yards"],
                         "number_of_holes": tee_data["number_of_holes"],
                         "par_total": tee_data["par_total"],
-                    }
+                    },
                 )
 
                 for idx, hole in enumerate(tee_data["holes"], start=1):
@@ -50,14 +57,16 @@ def save_courses(api_data):
                         defaults={
                             "par": hole["par"],
                             "yardage": hole["yardage"],
-                            "handicap": hole["handicap"]
-                        }
+                            "handicap": hole["handicap"],
+                        },
                     )
+
 
 # Create your views here.
 # view to get 20 nearest golf courses
 # using the golf course api
 # https://golfcourseapi.com/docs/v1/search
+
 
 class SearchCourses(APIView):
     def get(self, request, search_query):
@@ -74,17 +83,22 @@ class SearchCourses(APIView):
 
         if response.status_code == 200:
             data = response.json()
-            save_courses(data)
+            save_courses_from_api(data)
             # Filter courses based on the search query
             filtered_courses = []
             for course in data.get("courses", []):
-                if search_query.lower() in course["course_name"].lower():
-                    filtered_courses.append({
-                        "course_id": course["id"],
-                        "club_name": course["club_name"],
-                        "course_name": course["course_name"],
-                        "address": course["location"]["address"],
-                    })
+                if (
+                    search_query.lower() in course["course_name"].lower()
+                    or search_query.lower() in course["club_name"].lower()
+                ):
+                    filtered_courses.append(
+                        {
+                            "course_id": course["id"],
+                            "club_name": course["club_name"],
+                            "course_name": course["course_name"],
+                            "address": course["location"]["address"],
+                        }
+                    )
             # Return the filtered courses as a response
             return Response({"courses": filtered_courses})
         else:
