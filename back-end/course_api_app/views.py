@@ -6,8 +6,6 @@ import requests
 import os
 from .models import Course, TeeSet, TeeHole
 from .serializers import CourseSerializer, CourseDetailSerializer
-from user_app.views import UserAuth
-from user_app.models import User
 
 
 def save_courses_from_api(api_data):

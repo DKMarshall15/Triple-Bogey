@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'user_app',  # Custom user app
     'course_api_app',  # Course API app
     'scorecard_app',  # Scorecard app
-    
+    'course_review_app',  # Course review app
 ]
 
 MIDDLEWARE = [

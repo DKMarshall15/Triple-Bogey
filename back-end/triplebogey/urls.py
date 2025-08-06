@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/v1/users/', include('user_app.urls')),  # User app URLs
     path('api/v1/courses/', include('course_api_app.urls')),  # Course
     path('api/v1/scorecards/', include('scorecard_app.urls')),  # Scorecard app
+    path('api/v1/reviews/', include('course_review_app.urls')),  # Course review app
 ]
