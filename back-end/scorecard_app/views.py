@@ -1,0 +1,75 @@
+from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .models import Course, TeeSet, Scorecard, ScoreEntry
+from .serializers import ScorecardSerializer
+
+
+# Create your views here.
+class ScorecardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        scorecards = Scorecard.objects.filter(user=user).prefetch_related(
+            "entries__tee_hole"
+        )
+        serializer = ScorecardSerializer(scorecards, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        course_id = request.data.get("course_id")
+        user = request.user
+
+        try:
+            course = Course.objects.get(id=course_id)
+            gender = user.userprofile.gender
+            tee_set = TeeSet.objects.get(course=course, gender=gender)
+
+            # Create scorecard
+            scorecard = Scorecard.objects.create(
+                user=user, course=course, tee_set=tee_set
+            )
+
+            # Create blank entries for each hole
+            for tee_hole in tee_set.holes.order_by("number"):
+                ScoreEntry.objects.create(scorecard=scorecard, tee_hole=tee_hole)
+
+            return Response(
+                {"message": "Scorecard created", "scorecard_id": scorecard.id}
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+    def put(self, request, scorecard_id):
+        try:
+            scorecard = Scorecard.objects.get(id=scorecard_id, user=request.user)
+            entries_data = request.data.get("entries", [])
+
+            for entry_data in entries_data:
+                tee_hole_id = entry_data.get("tee_hole_id")
+                strokes = entry_data.get("strokes")
+
+                # Update or create score entry
+                ScoreEntry.objects.update_or_create(
+                    scorecard=scorecard,
+                    tee_hole_id=tee_hole_id,
+                    defaults={"strokes": strokes},
+                )
+
+            return Response({"message": "Scorecard updated"})
+        except Scorecard.DoesNotExist:
+            return Response({"error": "Scorecard not found"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+    def delete(self, request, scorecard_id):
+        try:
+            scorecard = Scorecard.objects.get(id=scorecard_id, user=request.user)
+            scorecard.delete()
+            return Response({"message": "Scorecard deleted"})
+        except Scorecard.DoesNotExist:
+            return Response({"error": "Scorecard not found"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
