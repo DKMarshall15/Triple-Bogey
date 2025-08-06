@@ -1,15 +1,15 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Course, TeeSet, Scorecard, ScoreEntry
 from .serializers import ScorecardSerializer
+from user_app.views import UserAuth 
 
 
 # Create your views here.
-class ScorecardView(APIView):
-    permission_classes = [IsAuthenticated]
-
+class ScorecardView(UserAuth):
+    # List scorecards
+    # This method retrieves all scorecards for the authenticated user
     def get(self, request):
         user = request.user
         scorecards = Scorecard.objects.filter(user=user).prefetch_related(
@@ -18,6 +18,8 @@ class ScorecardView(APIView):
         serializer = ScorecardSerializer(scorecards, many=True)
         return Response(serializer.data)
 
+    # Create scorecard
+    # This method allows users to create a new scorecard for a specific course
     def post(self, request):
         course_id = request.data.get("course_id")
         user = request.user
@@ -42,6 +44,8 @@ class ScorecardView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=400)
 
+    # Update scorecard
+    # This method allows users to update the strokes for multiple holes in a scorecard
     def put(self, request, scorecard_id):
         try:
             scorecard = Scorecard.objects.get(id=scorecard_id, user=request.user)
@@ -64,6 +68,8 @@ class ScorecardView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=400)
 
+    # Delete scorecard
+    # This method allows users to delete a scorecard by its ID
     def delete(self, request, scorecard_id):
         try:
             scorecard = Scorecard.objects.get(id=scorecard_id, user=request.user)
@@ -71,5 +77,24 @@ class ScorecardView(APIView):
             return Response({"message": "Scorecard deleted"})
         except Scorecard.DoesNotExist:
             return Response({"error": "Scorecard not found"}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+    # Update score entry
+    # This method allows users to update the strokes for a specific score entry
+    def patch(self, request, entry_id):
+        try:
+            entry = ScoreEntry.objects.get(id=entry_id, scorecard__user=request.user)
+            strokes = request.data.get("strokes")
+
+            if strokes is not None:
+                entry.strokes = strokes
+                entry.full_clean()  # Validate the entry
+                entry.save()
+                return Response({"message": "Score entry updated", "strokes": entry.strokes})
+            else:
+                return Response({"error": "Strokes value is required"}, status=400)
+        except ScoreEntry.DoesNotExist:
+            return Response({"error": "Score entry not found"}, status=404)
         except Exception as e:
             return Response({"error": str(e)}, status=400)

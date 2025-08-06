@@ -38,9 +38,9 @@ class TeeSet(models.Model):
 class TeeHole(models.Model):
     tee_set = models.ForeignKey(TeeSet, on_delete=models.CASCADE, related_name='holes')
     hole_number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(18)])
-    par = models.IntegerField()
+    par = models.IntegerField(validators=[MinValueValidator(3), MaxValueValidator(7)])
     yardage = models.IntegerField()
-    handicap = models.IntegerField()
+    handicap = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(18)], null=True, blank=True)
 
     class Meta:
         unique_together = ('tee_set', 'hole_number')

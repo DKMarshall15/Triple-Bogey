@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from models import Course, TeeSet
-from scorecard_app.serializers import TeeHoleSerializer
+from .models import Course, TeeSet, TeeHole
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -11,6 +10,16 @@ class CourseSerializer(serializers.ModelSerializer):
             "club_name",
             "course_name",
             "address",
+        ]
+
+class TeeHoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TeeHole
+        fields = [
+            "hole_number",
+            "par",
+            "yardage",
+            "handicap",
         ]
 
 
@@ -32,8 +41,9 @@ class TeeSetSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class CourseDetailSerializer(serializers.ModelSerializer):
-    tee_sets = TeeSetSerializer(many=True)
+    tee_sets = TeeSetSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course

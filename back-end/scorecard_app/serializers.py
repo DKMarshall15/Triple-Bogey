@@ -1,17 +1,7 @@
 from rest_framework import serializers
 from django.db.models import Sum
-from .models import Course, TeeSet, TeeHole, Scorecard, ScoreEntry
-
-
-class TeeHoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TeeHole
-        fields = [
-            "hole_number",
-            "par",
-            "yardage",
-            "handicap",
-        ]
+from .models import Scorecard, ScoreEntry
+from course_api_app.serializers import TeeSetSerializer, TeeHoleSerializer, CourseSerializer
 
 
 class ScoreEntrySerializer(serializers.ModelSerializer):
@@ -24,9 +14,10 @@ class ScoreEntrySerializer(serializers.ModelSerializer):
 
 class ScorecardSerializer(serializers.ModelSerializer):
     entries = ScoreEntrySerializer(many=True)
-    course = serializers.StringRelatedField()
-    tee_set = serializers.StringRelatedField()
+    course = CourseSerializer()
+    tee_set = TeeSetSerializer()
     total_strokes = serializers.SerializerMethodField()
+    user = serializers.StringRelatedField()  # Assuming User model has a __str__ method
 
     class Meta:
         model = Scorecard
@@ -40,4 +31,4 @@ class ScorecardSerializer(serializers.ModelSerializer):
         ]
 
     def get_total_strokes(self, obj):
-        return obj.entries.aggregate(Sum("strokes"))["strokes__sum"] or 0
+        return obj.entries.all().aggregate(Sum("strokes"))["strokes__sum"] or 0

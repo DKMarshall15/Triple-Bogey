@@ -10,8 +10,8 @@ class User(AbstractUser):
     gender = models.CharField(max_length=10, blank=True, default='unknown')
     
 
-
-
-
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.display_name

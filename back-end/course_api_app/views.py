@@ -5,13 +5,15 @@ from rest_framework.response import Response
 import requests
 import os
 from .models import Course, TeeSet, TeeHole
+from .serializers import CourseSerializer, CourseDetailSerializer
+from user_app.views import UserAuth
+from user_app.models import User
 
 
-# from requests_oauthlib import OAuth1
 def save_courses_from_api(api_data):
     # This function can be used to fetch courses from the external API
     # and save them to the database if needed.
-
+    
     course_list = api_data.get("courses", [])
     for course_data in course_list:
         course_id = course_data["id"]
@@ -32,9 +34,8 @@ def save_courses_from_api(api_data):
                 "longitude": course_data["location"]["longitude"],
             },
         )
-
         for gender in ["male", "female"]:
-            tee_sets = course_data["tees"].get(gender, [])
+            tee_sets = course_data["tees"].get(gender, [])  # course_data["tees"] is a dict with keys "male" and "female"
             for tee_data in tee_sets:
                 tee_set, _ = TeeSet.objects.update_or_create(
                     course=course,
@@ -50,7 +51,8 @@ def save_courses_from_api(api_data):
                     },
                 )
 
-                for idx, hole in enumerate(tee_data["holes"], start=1):
+                for idx, hole in enumerate(tee_data["holes"], start=1):  # tee_data["holes"] is a list of holes
+                    # Create or update TeeHole instances
                     TeeHole.objects.update_or_create(
                         tee_set=tee_set,
                         hole_number=idx,
@@ -83,25 +85,32 @@ class SearchCourses(APIView):
 
         if response.status_code == 200:
             data = response.json()
+
+            # Save or update courses to your DB
             save_courses_from_api(data)
-            # Filter courses based on the search query
-            filtered_courses = []
-            for course in data.get("courses", []):
-                if (
-                    search_query.lower() in course["course_name"].lower()
-                    or search_query.lower() in course["club_name"].lower()
-                ):
-                    filtered_courses.append(
-                        {
-                            "course_id": course["id"],
-                            "club_name": course["club_name"],
-                            "course_name": course["course_name"],
-                            "address": course["location"]["address"],
-                        }
-                    )
-            # Return the filtered courses as a response
-            return Response({"courses": filtered_courses})
+
+            # Extract course IDs from API data
+            course_ids = [course["id"] for course in data.get("courses", [])]
+
+            # Fetch saved courses from the DB and serialize them
+            courses = Course.objects.filter(course_id__in=course_ids)
+            course_serializer = CourseSerializer(courses, many=True)
+
+            return Response(course_serializer.data, status=200)
         else:
             return Response(
                 {"error": "Failed to fetch courses"}, status=response.status_code
             )
+
+# View to get details of a specific course by course_id
+class CourseDetail(APIView):
+    def get(self, request, course_id):
+        try:
+            course = Course.objects.get(course_id=course_id)
+            # Serialize the course data
+            course_serializer = CourseDetailSerializer(course)
+            return Response(course_serializer.data, status=200)
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=404)
+        
+
