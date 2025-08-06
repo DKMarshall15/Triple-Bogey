@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'user_app',  # Custom user app
     'course_api_app',  # Course API app
+    'scorecard_app',  # Scorecard app
     
 ]
 
