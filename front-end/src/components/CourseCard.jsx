@@ -28,9 +28,11 @@ function CourseCard({ course }) {
         Address: {address}
       </Typography>
       <Checkbox sx={{ marginTop: 2 }} icon={<FavoriteBorder />} checkedIcon={<Favorite sx={{ color: "red" }} />} />
+      {/* add favorite button functionality */}
       <Button variant="contained" color="primary" sx={{ marginTop: 2 }}>
         View Course
       </Button>
+      {/* add view course functionality */}
     </Box>
   );
   return (

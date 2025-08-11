@@ -1,4 +1,4 @@
-import { Container, Box, Pagination, Typography, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Container, Box, Pagination, Typography, FormControl, InputLabel, Select, MenuItem, Button } from "@mui/material";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -11,6 +11,9 @@ function CoursesPage() {
   const [courses, setCourses] = React.useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState('none');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Number of courses to display per page
   const coursesPerPage = 12;
 
   // Sort courses based on selected option
@@ -48,15 +51,16 @@ function CoursesPage() {
     // Reset to first page when sorting changes
     setCurrentPage(1);
   };
-  // Fetch courses from backend and store in state
-  // Use useEffect to call API and set courses state
-  // Map through courses to create CourseCard components
-  // Example course data structure:
-  // {
-  //   course_id: "1",
-  //   club_name: "Club Name",
-  //   course_name: "Course Name",
-  //   address: "123 Golf St, City, State, Zip",
+  // handle search functionality can be added later
+  const handleSearch = async () => {
+    // Implement search functionality
+    const response = await fetch(`http://127.0.0.1:8000/api/v1/courses/${searchQuery}`);
+    const courses = await response.json();
+    setCourses(courses);
+    setCurrentPage(1);
+    console.log("Search for:", searchQuery);
+    return courses;
+  };
 
   const fetchCourses = async () => {
     const response = await fetch("http://127.0.0.1:8000/api/v1/courses/");
@@ -81,15 +85,23 @@ function CoursesPage() {
 
   return (
     <Container>
+      {/* Search bar */}
       <Typography variant="h4" align="left" sx={{ mt: 4, mb: 2 }}>
         Search for a Course
       </Typography>
-      <TextField
-        label="Search Courses"
-        variant="outlined"
-        fullWidth
-        sx={{ mb: 3 }}
-      />
+      <Box sx={{ mb: 3, display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' } }}>
+        <TextField
+          label="Search Courses"
+          variant="outlined"
+          fullWidth
+          sx={{ mb: 3 }}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <Button variant="contained" color="primary" sx={{ mb: 3 }} onClick={handleSearch}>
+          Search
+        </Button>
+      </Box>
       {/* Sort controls */}
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <FormControl sx={{ minWidth: 200 }}>
@@ -116,21 +128,25 @@ function CoursesPage() {
       </Box>
 
       {/* Display current page courses in a grid */}
-      <Grid container spacing={3} sx={{ mb: 3 }}>
-        {currentCourses.length > 0 ? (
-          currentCourses.map((course, idx) => (
-            <Grid item xs={12} sm={6} md={4} key={course.course_id}>
-              <CourseCard course={course} />
+      <Box sx={{ flexGrow: 1, mb: 4 }}>
+        <Grid container spacing={3} columns={{ xs: 4, sm: 8, md: 12 }}>
+          {currentCourses.length > 0 ? (
+            currentCourses.map((course, idx) => (
+              <Grid item xs={12} sm={6} md={4} key={course.course_id}>
+                <CourseCard course={course} />
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}>
+              <Typography variant="body1" color="text.secondary">
+                No courses found.
+              </Typography>
             </Grid>
-          ))
-        ) : (
-          <Grid item xs={12}>
-            <Typography variant="body1" color="text.secondary">
-              No courses found.
-            </Typography>
-          </Grid>
-        )}
-      </Grid>
+          )}
+        </Grid>
+      </Box>
+
+      {/* Pagination controls */}
       {totalPages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
           <Pagination
