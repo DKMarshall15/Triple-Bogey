@@ -14,50 +14,50 @@ def save_courses_from_api(api_data):
     
     course_list = api_data.get("courses", [])
     for course_data in course_list:
-        course_id = course_data["id"]
+        course_id = course_data.get("id")
         # Check if the course already exists
         if Course.objects.filter(course_id=course_id).exists():
             print(f"Course with ID {course_id} already exists.")
             continue
         course, _ = Course.objects.update_or_create(
-            course_id=course_data["id"],
+            course_id=course_data.get("id"),
             defaults={
-                "club_name": course_data["club_name"],
-                "course_name": course_data["course_name"],
-                "address": course_data["location"]["address"],
-                "city": course_data["location"]["city"],
-                "state": course_data["location"]["state"],
-                "country": course_data["location"]["country"],
-                "latitude": course_data["location"]["latitude"],
-                "longitude": course_data["location"]["longitude"],
+                "club_name": course_data.get("club_name"),
+                "course_name": course_data.get("course_name"),
+                "address": course_data.get("location", {}).get("address"),
+                "city": course_data.get("location", {}).get("city"),
+                "state": course_data.get("location", {}).get("state"),
+                "country": course_data.get("location", {}).get("country"),
+                "latitude": course_data.get("location", {}).get("latitude"),
+                "longitude": course_data.get("location", {}).get("longitude"),
             },
         )
         for gender in ["male", "female"]:
-            tee_sets = course_data["tees"].get(gender, [])  # course_data["tees"] is a dict with keys "male" and "female"
+            tee_sets = course_data.get("tees", {}).get(gender, [])
             for tee_data in tee_sets:
                 tee_set, _ = TeeSet.objects.update_or_create(
                     course=course,
-                    tee_name=tee_data["tee_name"],
+                    tee_name=tee_data.get("tee_name"),
                     gender=gender,
                     defaults={
-                        "course_rating": tee_data["course_rating"],
-                        "slope_rating": tee_data["slope_rating"],
-                        "bogey_rating": tee_data["bogey_rating"],
-                        "total_yards": tee_data["total_yards"],
-                        "number_of_holes": tee_data["number_of_holes"],
-                        "par_total": tee_data.get("par_total", None),
+                        "course_rating": tee_data.get("course_rating"),
+                        "slope_rating": tee_data.get("slope_rating"),
+                        "bogey_rating": tee_data.get("bogey_rating"),
+                        "total_yards": tee_data.get("total_yards"),
+                        "number_of_holes": tee_data.get("number_of_holes"),
+                        "par_total": tee_data.get("par_total"),
                     },
                 )
 
-                for idx, hole in enumerate(tee_data["holes"], start=1):  # tee_data["holes"] is a list of holes
+                for idx, hole in enumerate(tee_data.get("holes", []), start=1):  # tee_data["holes"] is a list of holes
                     # Create or update TeeHole instances
                     TeeHole.objects.update_or_create(
                         tee_set=tee_set,
                         hole_number=idx,
                         defaults={
-                            "par": hole["par"],
-                            "yardage": hole["yardage"],
-                            "handicap": hole.get("handicap"),  # Uses None if not provided
+                            "par": hole.get("par"),
+                            "yardage": hole.get("yardage"),
+                            "handicap": hole.get("handicap"),
                         },
                     )
 
@@ -88,7 +88,7 @@ class SearchCourses(APIView):
             save_courses_from_api(data)
 
             # Extract course IDs from API data
-            course_ids = [course["id"] for course in data.get("courses", [])]
+            course_ids = [course.get("id") for course in data.get("courses", [])]
 
             # Fetch saved courses from the DB and serialize them
             courses = Course.objects.filter(course_id__in=course_ids)

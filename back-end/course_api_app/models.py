@@ -30,7 +30,7 @@ class TeeSet(models.Model):
 
     total_yards = models.IntegerField()
     number_of_holes = models.IntegerField()
-    par_total = models.IntegerField()
+    par_total = models.IntegerField(default=None, null=True, blank=True)
 
     def __str__(self):
         return f"{self.course.course_name} - Tee Color: {self.tee_name} ({self.gender})"
@@ -40,7 +40,7 @@ class TeeHole(models.Model):
     hole_number = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(18)])
     par = models.IntegerField(validators=[MinValueValidator(3), MaxValueValidator(7)])
     yardage = models.IntegerField()
-    handicap = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(18)], null=True, blank=True)
+    handicap = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(18)], null=True, blank=True, default=None)
 
     class Meta:
         unique_together = ('tee_set', 'hole_number')
