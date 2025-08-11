@@ -26,7 +26,7 @@ class UserSignup(APIView):
             return Response({"user":new_user.display_name, "token":token.key}, status=s.HTTP_201_CREATED)
         except ValidationError as e:
             print(e)
-            return Response(e, status=s.HTTP_400_BAD_REQUEST)
+            return Response(e.messages, status=s.HTTP_400_BAD_REQUEST)
 
 class UserLogin(APIView):
     def post(self, request):
@@ -51,7 +51,7 @@ class UserLogout(UserAuth):
 
 class UserProfile(UserAuth):
     def get(self, request):
-        return Response({"user": request.user.display_name})
+        return Response({"user": request.user})
 
     def put(self, request):
         try:
@@ -76,3 +76,11 @@ class UserProfile(UserAuth):
         except ValidationError as e:
             print(e)
             return Response(e, status=s.HTTP_400_BAD_REQUEST)
+        
+    def delete(self, request):
+        try:
+            request.user.delete()
+            return Response({"message": "User deleted successfully"}, status=s.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            print(e)
+            return Response({"error": "Failed to delete user"}, status=s.HTTP_400_BAD_REQUEST)

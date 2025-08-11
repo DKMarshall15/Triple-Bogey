@@ -1,14 +1,29 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import {AppBar, Toolbar, Typography, Container, Button, Box, List, ListItem, ListItemButton, ListItemText} from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Container,
+  Button,
+  Box,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import WeatherWidget from "./WeatherWidget.jsx";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { userLogOut } from "../pages/utilities";
+// import WeatherWidget from "./WeatherWidget.jsx";
 
-const Navbar = () => {
+const Navbar = ({ user, setUser }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -21,7 +36,22 @@ const Navbar = () => {
     { text: "Courses", link: "/courses" },
     { text: "Favorites", link: "/favorites" },
     { text: "Scorecards", link: "/scorecards" },
+    { text: "Signup", link: "/signup" },
+    { text: "Login", link: "/login" },
   ];
+  const [accountMenuAnchor, setAccountMenuAnchor] = useState(null);
+
+  const handleAccountMenuOpen = (event) => {
+    setAccountMenuAnchor(event.currentTarget);
+  };
+
+  const handleAccountMenuClose = () => {
+    setAccountMenuAnchor(null);
+  };
+
+  const isLoggedIn = !!user; // Check if user exists
+  console.log("User in Navbar:", user);
+
   return (
     <>
       <AppBar position="sticky" color="primary">
@@ -33,6 +63,7 @@ const Navbar = () => {
               style={{ height: 40, marginRight: 8 }}
             />
             <Typography
+              color="inherit"
               variant="h4"
               sx={{ flexGrow: 1, fontFamily: "Bangers, cursive" }}
             >
@@ -54,16 +85,24 @@ const Navbar = () => {
                 <Button component={Link} to="/scorecards" color="inherit">
                   Scorecards
                 </Button>
+                <IconButton color="inherit" onClick={handleAccountMenuOpen}>
+                  <AccountCircleIcon />
+                </IconButton>
+                <Typography
+                  variant="body1"
+                  sx={{ marginLeft: 2, color: "white" }}
+                >
+                  {isLoggedIn ? `Welcome, ${user}` : "Guest"}
+                </Typography>
               </>
             )}
           </Toolbar>
         </Container>
       </AppBar>
-      
-      <Container>
-        {/* <WeatherBanner lat={37.7749} lon={-122.4194} /> */}
+
+      {/* <Container>
         <WeatherWidget />
-      </Container>
+      </Container> */}
       <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
         <Box
           sx={{ width: 320 }}
@@ -85,6 +124,46 @@ const Navbar = () => {
           </List>
         </Box>
       </Drawer>
+      {/* Account Popup Menu */}
+      <Menu
+        anchorEl={accountMenuAnchor}
+        open={Boolean(accountMenuAnchor)}
+        onClose={handleAccountMenuClose}
+      >
+        {isLoggedIn ? (
+          <MenuItem onClick={handleAccountMenuClose}>
+            <Button
+              color="error"
+              variant="contained"
+              onClick={async () => {
+                await userLogOut();
+                setUser(null); // Clear user state on logout
+                handleAccountMenuClose();
+              }}
+            >
+              Logout
+            </Button>
+          </MenuItem>
+        ) : (
+          <MenuItem
+            sx={{ display: "flex", flexDirection: "column" }}
+            onClick={handleAccountMenuClose}
+          >
+            <Link
+              to="/login"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Login
+            </Link>
+            <Link
+              to="/signup"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Signup
+            </Link>
+          </MenuItem>
+        )}
+      </Menu>
     </>
   );
 };

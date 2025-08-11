@@ -4,14 +4,17 @@ import NotFoundPage from "./pages/NotFoundPage.jsx"; // Assuming you have a NotF
 import CoursesPage from "./pages/CoursesPage.jsx"; // Assuming you have a CoursesPage component
 import FavoritesPage from "./pages/FavoritesPage.jsx"; // Assuming you have a FavoritesPage component
 import ScorecardPage from "./pages/ScorecardsPage.jsx"; // Assuming you have a Score
-import SignupLoginPage from "./pages/SignupLoginPage.jsx"; // Assuming you have a SignupLoginPage component
 import HomePage from "./pages/HomePage.jsx"; // Assuming you have a HomePage component
+import SignUpPage from "./pages/SignUpPage.jsx"; // Assuming you have a SignUpPage component
+import LoginPage from "./pages/LoginPage.jsx"; // Assuming you have a LoginPage component
+import { userConfirmation } from "./pages/utilities.jsx";
 
 
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />,
+        loader: userConfirmation, // Assuming you have a userConfirmation function to check user authentication
         children: [
             // Define child routes here if needed
             {
@@ -20,7 +23,11 @@ const router = createBrowserRouter([
             },
             {
                 path: "/signup",
-                element: <SignupLoginPage />,
+                element: <SignUpPage />,
+            },
+            {
+                path: "/login",
+                element: <LoginPage />,
             },
             {
                 path: "/courses",

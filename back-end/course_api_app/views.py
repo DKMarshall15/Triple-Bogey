@@ -45,7 +45,7 @@ def save_courses_from_api(api_data):
                         "bogey_rating": tee_data["bogey_rating"],
                         "total_yards": tee_data["total_yards"],
                         "number_of_holes": tee_data["number_of_holes"],
-                        "par_total": tee_data["par_total"],
+                        "par_total": tee_data.get("par_total", None),
                     },
                 )
 
@@ -57,7 +57,7 @@ def save_courses_from_api(api_data):
                         defaults={
                             "par": hole["par"],
                             "yardage": hole["yardage"],
-                            "handicap": hole["handicap"],
+                            "handicap": hole.get("handicap"),  # Uses None if not provided
                         },
                     )
 
@@ -110,5 +110,12 @@ class CourseDetail(APIView):
             return Response(course_serializer.data, status=200)
         except Course.DoesNotExist:
             return Response({"error": "Course not found"}, status=404)
+        
+class AllCourses(APIView):
+    def get(self, request):
+        # Fetch all courses from the database
+        courses = Course.objects.all()
+        course_serializer = CourseSerializer(courses, many=True)
+        return Response(course_serializer.data, status=200)
         
 
