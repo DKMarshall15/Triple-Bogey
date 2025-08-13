@@ -2,34 +2,39 @@ import axios from 'axios';
 
 export const api = axios.create({
   baseURL: 'http://127.0.0.1:8000/api/v1/',
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });
 
-export const userSignUp = async (email, password) => {
-  try {
-    let response = await api.post("users/signup/", {
-      email: email,
-      password: password,
-    });
-    if (response.status === 201) {
-      let { user, token } = response.data;
-      // Store the token securely (e.g., in localStorage or HttpOnly cookies)
-      localStorage.setItem("token", token);
-      api.defaults.headers.common["Authorization"] = `Token ${token}`;
-      return user;
+export const userSignUp = async (username, email, password, gender) => {
+    try {
+        let response = await api.post("users/signup/", {
+            username: username,
+            email: email,
+            password: password,
+            gender: gender,
+        });
+        if (response.status === 201) {
+            let { user, token } = response.data;
+            // Store the token securely (e.g., in localStorage or HttpOnly cookies)
+            localStorage.setItem("token", token);
+            api.defaults.headers.common["Authorization"] = `Token ${token}`;
+            return user;
+        }
+    } catch (error) {
+        // Handle error response
+        if (error.response && error.response.data) {
+            // If the error response has a message, show it
+            const errorMessage = typeof error.response.data === 'string' 
+                ? error.response.data 
+                : error.response.data.message || error.response.data.error || JSON.stringify(error.response.data);
+            alert(errorMessage);
+        } else {
+            alert("Signup failed. Please try again.");
+        }
     }
-  } catch (error) {
-    // Handle error response
-    if (error.response && error.response.data) {
-      // If the error response has a message, show it
-      const errorMessage = typeof error.response.data === 'string' 
-        ? error.response.data 
-        : error.response.data.message || error.response.data.error || JSON.stringify(error.response.data);
-      alert(errorMessage);
-    } else {
-      alert("Signup failed. Please try again.");
-    }
-  }
-  return null;
+    return null;
 };
 
 export const userLogin = async (email, password) => {
@@ -90,3 +95,42 @@ export const userConfirmation = async () => {
   }
   return null;
 };
+
+export const fetchFavoriteCourses = async () => {
+  try {
+    let response = await api.get("reviews/favorites/");
+    if (response.status === 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error fetching favorite courses:", error);
+    alert("Failed to fetch favorite courses. Please try again.");
+  }
+  return null;
+};
+
+export const addFavoriteCourse = async (courseId) => {
+  try {
+    let response = await api.post(`reviews/favorites/${courseId}/`);
+    if (response.status === 201) {
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error adding course to favorites:", error);
+    alert("Failed to add course to favorites. Please try again.");
+  }
+  return null;
+}
+
+export const removeFavoriteCourse = async (courseId) => {
+  try {
+    let response = await api.delete(`reviews/favorites/${courseId}/`);
+    if (response.status === 204 || response.status === 200) {
+      return true;
+    }
+  } catch (error) {
+    console.error("Error removing course from favorites:", error);
+    alert("Failed to remove course from favorites. Please try again.");
+  }
+  return false;
+}

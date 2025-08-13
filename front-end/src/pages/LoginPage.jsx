@@ -59,6 +59,7 @@ const LogInPage = () => {
           label="Password"
           name="password"
           type="password"
+          autoComplete='current-password'
           fullWidth
           value={form.password}
           onChange={handleChange}

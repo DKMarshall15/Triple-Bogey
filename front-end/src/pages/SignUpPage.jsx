@@ -5,13 +5,20 @@ import { Link } from "react-router-dom";
 import { Container, Typography, Button } from "@mui/material";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import { userLogin, userSignUp } from "./utilities";
-import { useNavigate } from "react-router-dom";
+
+
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ display_name: "", email: "", password: "" });
+  const [form, setForm] = useState({ username: "", email: "", password: "", gender: "" });
   const { contextObj } = useOutletContext();
   const { setUser } = contextObj;
 
@@ -22,18 +29,12 @@ export default function SignupPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Signup form data:", form);
-    // Add API call here
-    userSignUp(form.display_name, form.email, form.password)
+    
+    userSignUp(form.username, form.email, form.password, form.gender)
       .then((user) => {
         if (user) {
           setUser(user);
-          userLogin(form.email, form.password)
-            .then(() => {
-              navigate("/courses");
-            })
-            .catch((error) => {
-              console.error("Error during login after signup:", error);
-            });
+          navigate("/courses"); // Remove the extra userLogin call
         } else {
           console.error("Signup failed");
         }
@@ -52,11 +53,11 @@ export default function SignupPage() {
       >
         <Typography variant="h5" align="center">Sign Up</Typography>
         <TextField
-          label="Display Name"
-          name="display_name"
+          label="Username"
+          name="username"
           type="text"
           fullWidth
-          value={form.display_name}
+          value={form.username}
           onChange={handleChange}
           required
         />
@@ -74,12 +75,26 @@ export default function SignupPage() {
           label="Password"
           name="password"
           type="password"
+          autoComplete="new-password"
           fullWidth
           value={form.password}
           onChange={handleChange}
           required
         />
-        
+        {/* gender radio options */}
+        <FormControl component="fieldset">
+          <FormLabel component="legend">Gender</FormLabel>
+          <RadioGroup
+            row
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+          >
+            <FormControlLabel value="male" control={<Radio />} label="Male" />
+            <FormControlLabel value="female" control={<Radio />} label="Female" />
+            <FormControlLabel value="other" control={<Radio />} label="Other" />
+          </RadioGroup>
+        </FormControl>
         <Button type="submit" variant="contained" fullWidth>Sign Up</Button>
         <Typography align="center" variant="body2">
           Already have an account?{" "}

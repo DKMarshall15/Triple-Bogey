@@ -92,7 +92,7 @@ const Navbar = ({ user, setUser }) => {
                   variant="body1"
                   sx={{ marginLeft: 2, color: "white" }}
                 >
-                  {isLoggedIn ? `Welcome, ${user}` : "Guest"}
+                  {isLoggedIn ? `Welcome, ${user.display_name || user.username}` : "Guest"}
                 </Typography>
               </>
             )}

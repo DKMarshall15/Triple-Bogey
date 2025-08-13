@@ -8,15 +8,27 @@ from user_app.views import UserAuth
 
 # Create your views here.
 class ScorecardView(UserAuth):
-    # List scorecards
-    # This method retrieves all scorecards for the authenticated user
-    def get(self, request):
+    # List ALL scorecards OR get a SINGLE scorecard
+    def get(self, request, scorecard_id=None):
         user = request.user
-        scorecards = Scorecard.objects.filter(user=user).prefetch_related(
-            "entries__tee_hole"
-        )
-        serializer = ScorecardSerializer(scorecards, many=True)
-        return Response(serializer.data)
+        
+        if scorecard_id:
+            # Get single scorecard
+            try:
+                scorecard = Scorecard.objects.filter(user=user).prefetch_related(
+                    "entries__tee_hole"
+                ).get(id=scorecard_id)
+                serializer = ScorecardSerializer(scorecard)
+                return Response(serializer.data)
+            except Scorecard.DoesNotExist:
+                return Response({"error": "Scorecard not found"}, status=404)
+        else:
+            # Get all scorecards (existing functionality)
+            scorecards = Scorecard.objects.filter(user=user).prefetch_related(
+                "entries__tee_hole"
+            )
+            serializer = ScorecardSerializer(scorecards, many=True)
+            return Response(serializer.data)
 
     # Create scorecard
     # This method allows users to create a new scorecard for a specific course

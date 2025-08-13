@@ -8,10 +8,10 @@ import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 
 function CoursesPage() {
-  const [courses, setCourses] = React.useState([]);
+  const [courses, setCourses] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState('none');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState("none");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Number of courses to display per page
   const coursesPerPage = 12;
@@ -132,12 +132,12 @@ function CoursesPage() {
         <Grid container spacing={3} columns={{ xs: 4, sm: 8, md: 12 }}>
           {currentCourses.length > 0 ? (
             currentCourses.map((course, idx) => (
-              <Grid item xs={12} sm={6} md={4} key={course.course_id}>
+              <Grid size={{ sm: 6, md: 4 }} key={course.course_id}>
                 <CourseCard course={course} />
               </Grid>
             ))
           ) : (
-            <Grid item xs={12}>
+            <Grid>
               <Typography variant="body1" color="text.secondary">
                 No courses found.
               </Typography>

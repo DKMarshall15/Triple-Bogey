@@ -3,6 +3,7 @@ from .views import ScorecardView
 
 urlpatterns = [
     path('', ScorecardView.as_view(), name='scorecard-list'),
+    path('<int:scorecard_id>/', ScorecardView.as_view(), name='scorecard-detail'),
     path('create/', ScorecardView.as_view(), name='scorecard-create'),
     path('update/<int:scorecard_id>/', ScorecardView.as_view(), name='scorecard-update'),
     path('delete/<int:scorecard_id>/', ScorecardView.as_view(), name='scorecard-delete'),

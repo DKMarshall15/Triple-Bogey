@@ -58,11 +58,27 @@ class CourseFavoriteView(UserAuth):
         # add a course to favorites
         try:
             course = Course.objects.get(course_id=course_id)
-            review, created = CourseReview.objects.get_or_create(user=request.user, course=course)
-            review.is_favorite = True
-            review.save()
-            response = CourseReviewSerializer(review)
-            return Response(response.data, status=201)
+            
+            # Check if a review already exists
+            try:
+                review = CourseReview.objects.get(user=request.user, course=course)
+                review.is_favorite = True
+                review.save()
+                created = False
+            except CourseReview.DoesNotExist:
+                # Create a minimal favorite entry (not a full review)
+                review = CourseReview.objects.create(
+                    user=request.user,
+                    course=course,
+                    is_favorite=True,
+                    # Only set required fields, leave review fields empty/null if allowed
+                )
+                created = True
+            
+            serializer = CourseReviewSerializer(review)
+            status_code = 201 if created else 200
+            return Response(serializer.data, status=status_code)
+            
         except Course.DoesNotExist:
             return Response({"error": "Course not found"}, status=404)
 
@@ -70,9 +86,15 @@ class CourseFavoriteView(UserAuth):
         try:
             course = Course.objects.get(course_id=course_id)
             review = CourseReview.objects.get(user=request.user, course=course)
-            review.is_favorite = False
-            review.save()
-            response = CourseReviewSerializer(review)
-            return Response(response.data, status=200)
+            
+            # If this is only a favorite (no actual review content), delete it
+            if review.comment == "Favorited without review" or not review.comment:
+                review.delete()
+                return Response(status=204)
+            else:
+                review.is_favorite = False
+                review.save()
+                return Response(status=200)
+            
         except (Course.DoesNotExist, CourseReview.DoesNotExist):
             return Response({"error": "Course or review not found"}, status=404)

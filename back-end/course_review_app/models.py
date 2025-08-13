@@ -9,7 +9,7 @@ class CourseReview(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reviews')
 
     is_favorite = models.BooleanField(default=False)
-    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=False, null=False)
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True, null=True)
 
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

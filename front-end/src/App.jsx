@@ -8,11 +8,15 @@ import { useState, useEffect } from "react";
 
 
 function App() {
-
   const [user, setUser] = useState(useLoaderData());
 
   useEffect(() => {
-    console.log(user);
+    console.log("Full user object:", user);
+    if (user) {
+      console.log("Username:", user.username);
+      console.log("Gender:", user.gender);
+      console.log("Display name:", user.display_name);
+    }
   }, [user]);
 
   const contextObj = { user, setUser };
