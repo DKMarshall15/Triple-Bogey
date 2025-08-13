@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import logoImage from "../assets/images/logo2.png"; 
 import {
   AppBar,
   Toolbar,
@@ -70,7 +71,7 @@ const Navbar = ({ user, setUser }) => {
         <Container>
           <Toolbar>
             <img
-              src="./src/assets/images/logo2.png"
+              src={logoImage}
               alt="Triple Bogey Logo"
               style={{ height: 40, marginRight: 8 }}
             />

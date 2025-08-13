@@ -7,7 +7,9 @@ import {
   CircularProgress,
   Alert,
   Container,
+  Button,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import { fetchCourseDetails } from "./utilities";
 import GolfScorecard from "../components/ScorecardCard.jsx";
 
@@ -22,16 +24,23 @@ function CourseDetailsPage() {
 
   // Filter tee sets based on user gender
   const getFilteredTeeSets = (teeSets) => {
-    if (!user || !user.gender || user.gender === 'other' || user.gender === 'unknown') {
+    if (
+      !user ||
+      !user.gender ||
+      user.gender === "other" ||
+      user.gender === "unknown"
+    ) {
       // Show all tee sets for users with no gender, 'other', or 'unknown'
       return teeSets;
     }
-    
+
     // Filter tee sets to match user's gender
-    return teeSets.filter(teeSet => teeSet.gender === user.gender);
+    return teeSets.filter((teeSet) => teeSet.gender === user.gender);
   };
 
-  const filteredTeeSets = courseDetails ? getFilteredTeeSets(courseDetails.tee_sets) : [];
+  const filteredTeeSets = courseDetails
+    ? getFilteredTeeSets(courseDetails.tee_sets)
+    : [];
 
   // Add callback function to handle tee selection
   const handleTeeChange = (teeData) => {
@@ -99,11 +108,24 @@ function CourseDetailsPage() {
       <Box p={2} mt={2}>
         <Typography variant="h3">Course Information:</Typography>
         {/* Display course information */}
-        <Box mt={2} sx={{ padding: 2, border: "1px solid #ccc", borderRadius: 2 }}>
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+        <Box
+          mt={2}
+          sx={{ padding: 2, border: "1px solid #ccc", borderRadius: 2 }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 3,
+            }}
+          >
             {/* Left side - Course Info */}
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
+              <Typography
+                variant="h5"
+                component="div"
+                sx={{ fontWeight: "bold" }}
+              >
                 Course ID: {course_id}
               </Typography>
               <Typography variant="h5" component="div">
@@ -113,14 +135,19 @@ function CourseDetailsPage() {
                 Address: {courseDetails.address}
               </Typography>
             </Box>
-            
+
             {/* Right side - Ratings */}
             <Box sx={{ flex: 1 }}>
               <Typography variant="h6">Ratings</Typography>
               {selectedTee ? (
                 <Box>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {selectedTee.tee_name} Tees ({selectedTee.gender}) - {selectedTee.total_yards} yards
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    {selectedTee.tee_name} Tees ({selectedTee.gender}) -{" "}
+                    {selectedTee.total_yards} yards
                   </Typography>
                   <Typography variant="body1">
                     Course Rating: {selectedTee.course_rating}
@@ -141,12 +168,23 @@ function CourseDetailsPage() {
                 </Typography>
               )}
             </Box>
+            <Box>
+              <Button
+                variant="contained"
+                color="secondary"
+                sx={{ marginTop: 2, marginLeft: 1 }}
+                component={Link}
+                to={`/play-round/${course_id}`}
+              >
+                Play Course
+              </Button>
+            </Box>
           </Box>
         </Box>
         <Box mt={3}>
-          <GolfScorecard 
-            courseData={{...courseDetails, tee_sets: filteredTeeSets}} 
-            readOnly={true} 
+          <GolfScorecard
+            courseData={{ ...courseDetails, tee_sets: filteredTeeSets }}
+            readOnly={true}
             onTeeChange={handleTeeChange}
           />
         </Box>

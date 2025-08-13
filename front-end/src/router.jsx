@@ -9,6 +9,7 @@ import SignUpPage from "./pages/SignUpPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx"; 
 import CourseDetailsPage from "./pages/CourseDetailsPage.jsx"; 
 import { userConfirmation } from "./pages/utilities.jsx";
+import PlayRoundPage from "./pages/PlayRoundPage.jsx";
 
 
 const router = createBrowserRouter([
@@ -36,7 +37,11 @@ const router = createBrowserRouter([
             },
             {
                 path: "/coursedetails/:course_id",
-                element: <CourseDetailsPage />, // Assuming you have a CourseDetailsPage component
+                element: <CourseDetailsPage />, 
+            },
+            {
+                path: "/play-round/:course_id",
+                element: <PlayRoundPage />,
             },
             {
                 path: "/favorites",
