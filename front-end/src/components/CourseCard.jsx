@@ -88,11 +88,19 @@ function CourseCard({ course }) {
         checkedIcon={<Favorite sx={{ color: "red" }} />} 
         onChange={handleFavorites} 
       />
-      {/* add favorite button functionality */}
-      <Button variant="contained" color="primary" sx={{ marginTop: 2 }}>
+      <Button variant="contained" color="primary" sx={{ marginTop: 2 }} component={Link} to={`/coursedetails/${course_id}`}>
         View Course
       </Button>
       {/* add view course functionality */}
+      <Button 
+        variant="contained" 
+        color="secondary" 
+        sx={{ marginTop: 2, marginLeft: 1 }}
+        component={Link}
+        to={`/play-round/${course_id}`}
+      >
+        Play Course
+      </Button>
     </Box>
   );
   return (

@@ -1,12 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
-import NotFoundPage from "./pages/NotFoundPage.jsx"; // Assuming you have a NotFoundPage component
-import CoursesPage from "./pages/CoursesPage.jsx"; // Assuming you have a CoursesPage component
-import FavoritesPage from "./pages/FavoritesPage.jsx"; // Assuming you have a FavoritesPage component
-import ScorecardPage from "./pages/ScorecardsPage.jsx"; // Assuming you have a Score
-import HomePage from "./pages/HomePage.jsx"; // Assuming you have a HomePage component
-import SignUpPage from "./pages/SignUpPage.jsx"; // Assuming you have a SignUpPage component
-import LoginPage from "./pages/LoginPage.jsx"; // Assuming you have a LoginPage component
+import NotFoundPage from "./pages/NotFoundPage.jsx"; 
+import CoursesPage from "./pages/CoursesPage.jsx"; 
+import FavoritesPage from "./pages/FavoritesPage.jsx"; 
+import ScorecardPage from "./pages/ScorecardsPage.jsx"; 
+import HomePage from "./pages/HomePage.jsx"; 
+import SignUpPage from "./pages/SignUpPage.jsx"; 
+import LoginPage from "./pages/LoginPage.jsx"; 
+import CourseDetailsPage from "./pages/CourseDetailsPage.jsx"; 
 import { userConfirmation } from "./pages/utilities.jsx";
 
 
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
             {
                 path: "/courses",
                 element: <CoursesPage />,
+            },
+            {
+                path: "/coursedetails/:course_id",
+                element: <CourseDetailsPage />, // Assuming you have a CourseDetailsPage component
             },
             {
                 path: "/favorites",

@@ -32,13 +32,25 @@ const Navbar = ({ user, setUser }) => {
     setDrawerOpen(!drawerOpen);
   };
 
-  const drawerLinks = [
-    { text: "Courses", link: "/courses" },
-    { text: "Favorites", link: "/favorites" },
-    { text: "Scorecards", link: "/scorecards" },
-    { text: "Signup", link: "/signup" },
-    { text: "Login", link: "/login" },
-  ];
+  // Update drawer links based on login status
+  const getDrawerLinks = () => {
+    const baseLinks = [
+      { text: "Courses", link: "/courses" },
+      { text: "Favorites", link: "/favorites" },
+      { text: "Scorecards", link: "/scorecards" },
+    ];
+
+    if (isLoggedIn) {
+      return baseLinks; // Only show main navigation for logged-in users
+    } else {
+      return [
+        ...baseLinks,
+        { text: "Signup", link: "/signup" },
+        { text: "Login", link: "/login" },
+      ];
+    }
+  };
+
   const [accountMenuAnchor, setAccountMenuAnchor] = useState(null);
 
   const handleAccountMenuOpen = (event) => {
@@ -110,7 +122,7 @@ const Navbar = ({ user, setUser }) => {
           onClick={toggleDrawer(false)}
         >
           <List>
-            {drawerLinks.map((linkItem, index) => (
+            {getDrawerLinks().map((linkItem, index) => (
               <ListItem key={index} disablePadding>
                 <ListItemButton
                   component={Link}
@@ -121,6 +133,20 @@ const Navbar = ({ user, setUser }) => {
                 </ListItemButton>
               </ListItem>
             ))}
+            {/* Add logout option for logged-in users */}
+            {isLoggedIn && (
+              <ListItem disablePadding>
+                <ListItemButton
+                  onClick={async () => {
+                    await userLogOut();
+                    setUser(null);
+                    setDrawerOpen(false);
+                  }}
+                >
+                  <ListItemText primary="Logout" />
+                </ListItemButton>
+              </ListItem>
+            )}
           </List>
         </Box>
       </Drawer>

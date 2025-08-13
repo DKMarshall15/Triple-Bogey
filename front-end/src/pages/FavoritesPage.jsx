@@ -1,20 +1,52 @@
 import { useState, useEffect } from "react";
-import { Container, Box, Typography, Grid } from "@mui/material";
+import { Container, Box, Typography, Grid, CircularProgress } from "@mui/material";
 import CourseCard from "../components/CourseCard.jsx";
 import { fetchFavoriteCourses } from "./utilities.jsx";
 
 function FavoritesPage() {
   const [favoriteCourses, setFavoriteCourses] = useState([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
-    fetchFavoriteCourses().then(favoriteReviews => {
-      if (favoriteReviews && Array.isArray(favoriteReviews)) {
-        // Extract the course data from the CourseReview objects
-        const courses = favoriteReviews.map(favorite => favorite.course);
-        setFavoriteCourses(courses);
+    const getFavoriteCourses = async () => {
+      try {
+        setLoading(true);
+        const favoriteReviews = await fetchFavoriteCourses();
+        if (favoriteReviews && Array.isArray(favoriteReviews)) {
+          // Extract the course data from the CourseReview objects
+          const courses = favoriteReviews.map(favorite => favorite.course);
+          setFavoriteCourses(courses);
+        }
+      } catch (error) {
+        console.error("Error fetching favorite courses:", error);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    getFavoriteCourses();
   }, []);
+
+  // Show loading spinner while fetching favorites
+  if (loading) {
+    return (
+      <Container>
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="center" 
+          minHeight="400px"
+          flexDirection="column"
+          gap={2}
+        >
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading favorite courses...
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container>

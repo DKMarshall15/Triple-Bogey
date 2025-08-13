@@ -1,4 +1,4 @@
-import { Container, Box, Pagination, Typography, FormControl, InputLabel, Select, MenuItem, Button } from "@mui/material";
+import { Container, Box, Pagination, Typography, FormControl, InputLabel, Select, MenuItem, Button, CircularProgress } from "@mui/material";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -12,6 +12,8 @@ function CoursesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("none");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true); // Add loading state
+  const [searchLoading, setSearchLoading] = useState(false); // Add search loading state
 
   // Number of courses to display per page
   const coursesPerPage = 12;
@@ -51,37 +53,66 @@ function CoursesPage() {
     // Reset to first page when sorting changes
     setCurrentPage(1);
   };
-  // handle search functionality can be added later
+
+  // handle search functionality
   const handleSearch = async () => {
-    // Implement search functionality
-    const response = await fetch(`http://127.0.0.1:8000/api/v1/courses/${searchQuery}`);
-    const courses = await response.json();
-    setCourses(courses);
-    setCurrentPage(1);
-    console.log("Search for:", searchQuery);
-    return courses;
+    try {
+      setSearchLoading(true);
+      const response = await fetch(`http://127.0.0.1:8000/api/v1/courses/${searchQuery}`);
+      const courses = await response.json();
+      setCourses(courses);
+      setCurrentPage(1);
+      console.log("Search for:", searchQuery);
+    } catch (error) {
+      console.error("Error searching courses:", error);
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
   const fetchCourses = async () => {
-    const response = await fetch("http://127.0.0.1:8000/api/v1/courses/");
-    const courses = await response.json();
-    setCourses(courses);
-    // Assuming the response is an array of course objects
-    // Each course object should have properties like course_id, club_name, course_name, address
-    return courses;
+    try {
+      setLoading(true);
+      const response = await fetch("http://127.0.0.1:8000/api/v1/courses/");
+      const courses = await response.json();
+      setCourses(courses);
+      return courses;
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    } finally {
+      setLoading(false);
+    }
   };
-  // pagination, search, and filtering can be added later
 
   // Use useEffect to call fetchCourses and set state
   useEffect(() => {
     const getCourses = async () => {
-      const courses = await fetchCourses();
-      setCourses(courses);
-      // Reset to first page when courses are loaded
+      await fetchCourses();
       setCurrentPage(1);
     };
     getCourses();
   }, []);
+
+  // Show loading spinner while fetching initial courses
+  if (loading) {
+    return (
+      <Container>
+        <Box 
+          display="flex" 
+          justifyContent="center" 
+          alignItems="center" 
+          minHeight="400px"
+          flexDirection="column"
+          gap={2}
+        >
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Loading courses...
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -97,11 +128,24 @@ function CoursesPage() {
           sx={{ mb: 3 }}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !searchLoading && searchQuery.trim()) {
+              handleSearch();
+            }
+          }}
+          disabled={searchLoading}
         />
-        <Button variant="contained" color="primary" sx={{ mb: 3 }} onClick={handleSearch}>
-          Search
+        <Button 
+          variant="contained" 
+          color="primary" 
+          sx={{ mb: 3 }} 
+          onClick={handleSearch}
+          disabled={searchLoading || !searchQuery.trim()}
+        >
+          {searchLoading ? <CircularProgress size={24} color="inherit" /> : 'Search'}
         </Button>
       </Box>
+
       {/* Sort controls */}
       <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <FormControl sx={{ minWidth: 200 }}>

@@ -134,3 +134,53 @@ export const removeFavoriteCourse = async (courseId) => {
   }
   return false;
 }
+
+export const fetchCourseWithTees = async (courseId) => {
+  try {
+    let response = await api.get(`courses/course/${courseId}/`);
+    if (response.status === 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error fetching course with tees:", error);
+    alert("Failed to fetch course data. Please try again.");
+  }
+  return null;
+}
+
+export const fetchUserScorecards = async () => {
+  try {
+    let response = await api.get("scorecards/");
+    if (response.status === 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error fetching scorecards:", error);
+  }
+  return null;
+};
+
+export const saveScorecard = async (roundData) => {
+  try {
+    let response = await api.post("scorecards/", roundData);
+    if (response.status === 201) {
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error saving scorecard:", error);
+  }
+  return null;
+};
+
+export const fetchCourseDetails = async (courseId) => {
+  try {
+    let response = await api.get(`courses/course/${courseId}/`);
+    if (response.status === 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error fetching course details:", error);
+    alert("Failed to fetch course details. Please try again.");
+  }
+  return null;
+}

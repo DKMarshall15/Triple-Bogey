@@ -52,5 +52,7 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             "club_name",
             "course_name",
             "address",
+            "longitude",
+            "latitude",
             "tee_sets",
         ]
