@@ -13,12 +13,16 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import { userLogin, userSignUp } from "./utilities";
-
-
+import bgimg from "../assets/images/beach.jpg";
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", email: "", password: "", gender: "" });
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    gender: "",
+  });
   const { contextObj } = useOutletContext();
   const { setUser } = contextObj;
 
@@ -29,7 +33,7 @@ export default function SignupPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Signup form data:", form);
-    
+
     userSignUp(form.username, form.email, form.password, form.gender)
       .then((user) => {
         if (user) {
@@ -45,64 +49,95 @@ export default function SignupPage() {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ mt: 8, display: "flex", flexDirection: "column", gap: 2 }}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundImage: `url(${bgimg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      <Container
+        maxWidth="xs"
+        sx={{
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          borderRadius: 2,
+          p: 4,
+        }}
       >
-        <Typography variant="h5" align="center">Sign Up</Typography>
-        <TextField
-          label="Username"
-          name="username"
-          type="text"
-          fullWidth
-          value={form.username}
-          onChange={handleChange}
-          required
-        />
-        
-        <TextField
-          label="Email"
-          name="email"
-          type="email"
-          fullWidth
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-        <TextField
-          label="Password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          fullWidth
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-        {/* gender radio options */}
-        <FormControl component="fieldset">
-          <FormLabel component="legend">Gender</FormLabel>
-          <RadioGroup
-            row
-            name="gender"
-            value={form.gender}
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}
+        >
+          <Typography variant="h5" align="center">
+            Sign Up
+          </Typography>
+          <TextField
+            label="Username"
+            name="username"
+            type="text"
+            fullWidth
+            value={form.username}
             onChange={handleChange}
-          >
-            <FormControlLabel value="male" control={<Radio />} label="Male" />
-            <FormControlLabel value="female" control={<Radio />} label="Female" />
-            <FormControlLabel value="other" control={<Radio />} label="Other" />
-          </RadioGroup>
-        </FormControl>
-        <Button type="submit" variant="contained" fullWidth>Sign Up</Button>
-        <Typography align="center" variant="body2">
-          Already have an account?{" "}
-          <Link onClick={() => navigate("/login")} sx={{ cursor: "pointer" }}>
-            Login
-          </Link>
-        </Typography>
-      </Box>
-    </Container>
+            required
+          />
+
+          <TextField
+            label="Email"
+            name="email"
+            type="email"
+            fullWidth
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            fullWidth
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+          {/* gender radio options */}
+          <FormControl component="fieldset">
+            <FormLabel component="legend">Gender</FormLabel>
+            <RadioGroup
+              row
+              name="gender"
+              value={form.gender}
+              onChange={handleChange}
+            >
+              <FormControlLabel value="male" control={<Radio />} label="Male" />
+              <FormControlLabel
+                value="female"
+                control={<Radio />}
+                label="Female"
+              />
+              <FormControlLabel
+                value="other"
+                control={<Radio />}
+                label="Other"
+              />
+            </RadioGroup>
+          </FormControl>
+          <Button type="submit" variant="contained" fullWidth>
+            Sign Up
+          </Button>
+          <Typography align="center" variant="body2">
+            Already have an account?{" "}
+            <Link onClick={() => navigate("/login")} sx={{ cursor: "pointer" }}>
+              Login
+            </Link>
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
   );
 }

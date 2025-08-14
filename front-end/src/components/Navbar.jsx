@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logoImage from "../assets/images/logo2.png"; 
 import {
   AppBar,
@@ -28,6 +28,7 @@ const Navbar = ({ user, setUser }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const navigate = useNavigate();
 
   const toggleDrawer = (open) => () => {
     setDrawerOpen(!drawerOpen);
@@ -36,19 +37,21 @@ const Navbar = ({ user, setUser }) => {
   // Update drawer links based on login status
   const getDrawerLinks = () => {
     const baseLinks = [
-      { text: "Courses", link: "/courses" },
-      { text: "Favorites", link: "/favorites" },
-      { text: "Scorecards", link: "/scorecards" },
+      { text: "Courses", link: "/courses" }, // Always show courses
     ];
 
     if (isLoggedIn) {
-      return baseLinks; // Only show main navigation for logged-in users
+      return [
+        ...baseLinks,
+        { text: "Favorites", link: "/favorites" },
+        { text: "Scorecards", link: "/scorecards" },
+      ]; // Only show Favorites and Scorecards for logged-in users
     } else {
       return [
         ...baseLinks,
         { text: "Signup", link: "/signup" },
         { text: "Login", link: "/login" },
-      ];
+      ]; // Show Signup/Login for guests
     }
   };
 
@@ -65,16 +68,32 @@ const Navbar = ({ user, setUser }) => {
   const isLoggedIn = !!user; // Check if user exists
   console.log("User in Navbar:", user);
 
+  const handleLogout = async () => {
+    try {
+      await userLogOut(); // Call your existing logout function
+      setUser(null); // Clear user state in App component
+      navigate('/'); // Navigate to homepage
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <>
       <AppBar position="sticky" color="primary">
         <Container>
           <Toolbar>
-            <img
-              src={logoImage}
-              alt="Triple Bogey Logo"
-              style={{ height: 40, marginRight: 8 }}
-            />
+            <IconButton
+              component={Link}
+              to="/"
+              sx={{ padding: 0, marginRight: 1 }}
+            >
+              <img
+                src={logoImage}
+                alt="Triple Bogey Logo"
+                style={{ height: 40 }}
+              />
+            </IconButton>
             <Typography
               color="inherit"
               variant="h4"
@@ -92,12 +111,17 @@ const Navbar = ({ user, setUser }) => {
                 <Button component={Link} to="/courses" color="inherit">
                   Courses
                 </Button>
-                <Button component={Link} to="/favorites" color="inherit">
-                  Favorites
-                </Button>
-                <Button component={Link} to="/scorecards" color="inherit">
-                  Scorecards
-                </Button>
+                {/* Only show Favorites and Scorecards for logged-in users */}
+                {isLoggedIn && (
+                  <>
+                    <Button component={Link} to="/favorites" color="inherit">
+                      Favorites
+                    </Button>
+                    <Button component={Link} to="/scorecards" color="inherit">
+                      Scorecards
+                    </Button>
+                  </>
+                )}
                 <IconButton color="inherit" onClick={handleAccountMenuOpen}>
                   <AccountCircleIcon />
                 </IconButton>
@@ -138,11 +162,7 @@ const Navbar = ({ user, setUser }) => {
             {isLoggedIn && (
               <ListItem disablePadding>
                 <ListItemButton
-                  onClick={async () => {
-                    await userLogOut();
-                    setUser(null);
-                    setDrawerOpen(false);
-                  }}
+                  onClick={handleLogout}
                 >
                   <ListItemText primary="Logout" />
                 </ListItemButton>
@@ -162,11 +182,7 @@ const Navbar = ({ user, setUser }) => {
             <Button
               color="error"
               variant="contained"
-              onClick={async () => {
-                await userLogOut();
-                setUser(null); // Clear user state on logout
-                handleAccountMenuClose();
-              }}
+              onClick={handleLogout}
             >
               Logout
             </Button>

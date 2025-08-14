@@ -14,12 +14,10 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import { saveScorecard } from "../pages/utilities.jsx";
 
 export default function PlayRoundCard({ courseData, onRoundComplete }) {
   const [selectedTee, setSelectedTee] = useState(courseData.tee_sets[0]);
   const [scores, setScores] = useState({});
-  const [saving, setSaving] = useState(false);
 
   const handleScoreChange = (holeNumber, value) => {
     setScores((prev) => ({
@@ -33,28 +31,18 @@ export default function PlayRoundCard({ courseData, onRoundComplete }) {
     0
   );
 
-  const handleSaveRound = async () => {
-    try {
-      setSaving(true);
-      const roundData = {
-        course_id: courseData.course_id,
-        tee_set_id: selectedTee.id,
-        scores: scores,
-        total_score: totalScore,
-        date_played: new Date().toISOString().split('T')[0]
-      };
-      
-      const result = await saveScorecard(roundData);
-      if (result) {
-        alert("Round saved successfully!");
-        onRoundComplete && onRoundComplete(result);
-      }
-    } catch (error) {
-      console.error("Error saving round:", error);
-      alert("Failed to save round. Please try again.");
-    } finally {
-      setSaving(false);
-    }
+  const handleSubmitRound = () => {
+    const scoresData = selectedTee.holes.map((hole) => ({
+      hole_number: hole.hole_number,
+      strokes: scores[hole.hole_number] || 0,
+      par: hole.par,
+    }));
+
+    // Pass both scores and tee set info
+    onRoundComplete({
+      scores: scoresData,
+      tee_set_id: selectedTee.id, // Add this
+    });
   };
 
   return (
@@ -67,7 +55,9 @@ export default function PlayRoundCard({ courseData, onRoundComplete }) {
         <Select
           value={selectedTee.tee_name}
           onChange={(e) => {
-            const tee = courseData.tee_sets.find(t => t.tee_name === e.target.value);
+            const tee = courseData.tee_sets.find(
+              (t) => t.tee_name === e.target.value
+            );
             setSelectedTee(tee);
           }}
         >
@@ -79,29 +69,121 @@ export default function PlayRoundCard({ courseData, onRoundComplete }) {
         </Select>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer
+        component={Paper}
+        sx={{
+          maxWidth: "100%",
+          overflowX: "auto",
+          "& .MuiTable-root": {
+            minWidth: 650,
+          },
+        }}
+      >
+        <Table size="small">
           <TableHead>
-            <TableRow>
-              <TableCell>Hole</TableCell>
+            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  minWidth: 60,
+                  position: "sticky",
+                  left: 0,
+                  backgroundColor: "#f5f5f5",
+                  zIndex: 1,
+                }}
+              >
+                Hole
+              </TableCell>
               {selectedTee.holes.map((h) => (
-                <TableCell key={h.hole_number} align="center">
+                <TableCell
+                  key={h.hole_number}
+                  align="center"
+                  sx={{ minWidth: 50, fontWeight: "bold" }}
+                >
                   {h.hole_number}
                 </TableCell>
               ))}
-              <TableCell align="center">Total</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold", minWidth: 60 }}>
+                Total
+              </TableCell>
             </TableRow>
+
             <TableRow>
-              <TableCell>Par</TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  position: "sticky",
+                  left: 0,
+                  backgroundColor: "#fff",
+                  zIndex: 1,
+                }}
+              >
+                Par
+              </TableCell>
               {selectedTee.holes.map((h) => (
                 <TableCell key={h.hole_number} align="center">
                   {h.par}
                 </TableCell>
               ))}
-              <TableCell align="center">{selectedTee.par_total}</TableCell>
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                {selectedTee.par_total}
+              </TableCell>
             </TableRow>
+
             <TableRow>
-              <TableCell>Score</TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  position: "sticky",
+                  left: 0,
+                  backgroundColor: "#fff",
+                  zIndex: 1,
+                }}
+              >
+                Yards
+              </TableCell>
+              {selectedTee.holes.map((h) => (
+                <TableCell key={h.hole_number} align="center">
+                  {h.yardage}
+                </TableCell>
+              ))}
+              <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                {selectedTee.total_yards}
+              </TableCell>
+            </TableRow>
+
+            <TableRow>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  position: "sticky",
+                  left: 0,
+                  backgroundColor: "#fff",
+                  zIndex: 1,
+                }}
+              >
+                HCP
+              </TableCell>
+              {selectedTee.holes.map((h) => (
+                <TableCell key={h.hole_number} align="center">
+                  {h.handicap}
+                </TableCell>
+              ))}
+              <TableCell />
+            </TableRow>
+
+            <TableRow sx={{ backgroundColor: "#fafafa" }}>
+              <TableCell
+                sx={{
+                  fontWeight: "bold",
+                  position: "sticky",
+                  left: 0,
+                  backgroundColor: "#fafafa",
+                  zIndex: 1,
+                }}
+              >
+                Score
+              </TableCell>
               {selectedTee.holes.map((h) => (
                 <TableCell key={h.hole_number} align="center">
                   <TextField
@@ -111,16 +193,27 @@ export default function PlayRoundCard({ courseData, onRoundComplete }) {
                     onChange={(e) =>
                       handleScoreChange(h.hole_number, e.target.value)
                     }
+                    sx={{
+                      "& .MuiInputBase-input": {
+                        textAlign: "center",
+                        width: "40px",
+                        height: "20px",
+                        padding: "4px",
+                      },
+                    }}
                     slotProps={{
                       htmlInput: {
-                        style: { textAlign: "center", width: "50px" },
+                        min: 1,
+                        max: 15,
                       },
                     }}
                   />
                 </TableCell>
               ))}
               <TableCell align="center">
-                <Typography variant="h6">{totalScore || 0}</Typography>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  {totalScore || 0}
+                </Typography>
               </TableCell>
             </TableRow>
           </TableHead>
@@ -131,10 +224,10 @@ export default function PlayRoundCard({ courseData, onRoundComplete }) {
         <Button
           variant="contained"
           color="primary"
-          onClick={handleSaveRound}
-          disabled={saving || totalScore === 0}
+          onClick={handleSubmitRound}
+          disabled={totalScore === 0}
         >
-          {saving ? "Saving..." : "Save Round"}
+          Submit Round
         </Button>
       </Box>
     </Box>

@@ -96,7 +96,16 @@ export default function GolfScorecard({ courseData, readOnly = false, onTeeChang
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-              <TableCell sx={{ fontWeight: 'bold', minWidth: 60 }}>Hole</TableCell>
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                minWidth: 60,
+                position: 'sticky',
+                left: 0,
+                backgroundColor: '#f5f5f5',
+                zIndex: 1
+              }}>
+                Hole
+              </TableCell>
               {selectedTee?.holes?.map((h) => (
                 <TableCell key={h.hole_number} align="center" sx={{ minWidth: 50, fontWeight: 'bold' }}>
                   {h.hole_number}
@@ -106,7 +115,15 @@ export default function GolfScorecard({ courseData, readOnly = false, onTeeChang
             </TableRow>
             
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Par</TableCell>
+              <TableCell sx={{ 
+                fontWeight: 'bold',
+                position: 'sticky',
+                left: 0,
+                backgroundColor: '#fff',
+                zIndex: 1
+              }}>
+                Par
+              </TableCell>
               {selectedTee?.holes?.map((h) => (
                 <TableCell key={h.hole_number} align="center">
                   {h.par}
@@ -118,7 +135,15 @@ export default function GolfScorecard({ courseData, readOnly = false, onTeeChang
             </TableRow>
             
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>Yards</TableCell>
+              <TableCell sx={{ 
+                fontWeight: 'bold',
+                position: 'sticky',
+                left: 0,
+                backgroundColor: '#fff',
+                zIndex: 1
+              }}>
+                Yards
+              </TableCell>
               {selectedTee?.holes?.map((h) => (
                 <TableCell key={h.hole_number} align="center">
                   {h.yardage}
@@ -130,7 +155,15 @@ export default function GolfScorecard({ courseData, readOnly = false, onTeeChang
             </TableRow>
             
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold' }}>HCP</TableCell>
+              <TableCell sx={{ 
+                fontWeight: 'bold',
+                position: 'sticky',
+                left: 0,
+                backgroundColor: '#fff',
+                zIndex: 1
+              }}>
+                HCP
+              </TableCell>
               {selectedTee?.holes?.map((h) => (
                 <TableCell key={h.hole_number} align="center">
                   {h.handicap}
@@ -143,7 +176,15 @@ export default function GolfScorecard({ courseData, readOnly = false, onTeeChang
           {!readOnly && (
             <TableBody>
               <TableRow sx={{ backgroundColor: '#fafafa' }}>
-                <TableCell sx={{ fontWeight: 'bold' }}>Score</TableCell>
+                <TableCell sx={{ 
+                  fontWeight: 'bold',
+                  position: 'sticky',
+                  left: 0,
+                  backgroundColor: '#fafafa',
+                  zIndex: 1
+                }}>
+                  Score
+                </TableCell>
                 {selectedTee?.holes?.map((h) => (
                   <TableCell key={h.hole_number} align="center">
                     <TextField

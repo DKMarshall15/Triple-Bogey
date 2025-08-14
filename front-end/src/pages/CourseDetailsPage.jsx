@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Add useNavigate
 import { useOutletContext } from "react-router-dom";
 import {
   Box,
@@ -10,17 +10,25 @@ import {
   Button,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import { ArrowBack } from "@mui/icons-material"; // Add ArrowBack icon
 import { fetchCourseDetails } from "./utilities";
 import GolfScorecard from "../components/ScorecardCard.jsx";
+import bgimg from "../assets/images/fairway.jpg";
 
 function CourseDetailsPage() {
   const { course_id } = useParams();
-  const { contextObj } = useOutletContext(); // Get user context
+  const navigate = useNavigate(); // Add navigate hook
+  const { contextObj } = useOutletContext();
   const { user } = contextObj;
   const [courseDetails, setCourseDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedTee, setSelectedTee] = useState(null);
+
+  // Add back to courses handler
+  const handleBackToCourses = () => {
+    navigate("/courses");
+  };
 
   // Filter tee sets based on user gender
   const getFilteredTeeSets = (teeSets) => {
@@ -104,105 +112,133 @@ function CourseDetailsPage() {
   }
 
   return (
-    <Container>
-      <Box p={2} mt={2}>
-        <Typography variant="h3">Course Information:</Typography>
-        {/* Display course information */}
-        <Box
-          mt={2}
-          sx={{ padding: 2, border: "1px solid #ccc", borderRadius: 2 }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              gap: 3,
-            }}
-          >
-            {/* Left side - Course Info */}
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="h5"
-                component="div"
-                sx={{ fontWeight: "bold" }}
-              >
-                Course ID: {course_id}
-              </Typography>
-              <Typography variant="h5" component="div">
-                Course Name: {courseDetails.course_name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Address: {courseDetails.address}
-              </Typography>
-            </Box>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundImage: `url(${bgimg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }}
+    >
+      <Container>
+        <Box p={2} sx={{ backgroundColor: "rgba(255, 255, 255, 0.8)", borderRadius: 2 }}>
+          {/* Header with back button */}
+          <Box display="flex" alignItems="center" mb={3}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBack />}
+              onClick={handleBackToCourses}
+              sx={{ mr: 2 }}
+            >
+              Back to Courses
+            </Button>
+            <Typography variant="h3">Course Information</Typography>
+          </Box>
 
-            {/* Right side - Ratings */}
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h6">Ratings</Typography>
-              {selectedTee ? (
-                <Box>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    {selectedTee.tee_name} Tees ({selectedTee.gender}) -{" "}
-                    {selectedTee.total_yards} yards
-                  </Typography>
-                  <Typography variant="body1">
-                    Course Rating: {selectedTee.course_rating}
-                  </Typography>
-                  <Typography variant="body1">
-                    Slope Rating: {selectedTee.slope_rating}
-                  </Typography>
-                  <Typography variant="body1">
-                    Bogey Rating: {selectedTee.bogey_rating}
-                  </Typography>
-                  <Typography variant="body1">
-                    Par: {selectedTee.par_total}
-                  </Typography>
-                </Box>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Select a tee below to view ratings
+          {/* Display course information */}
+          <Box
+            mt={2}
+            sx={{ padding: 2, border: "1px solid #ccc", borderRadius: 2 }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                gap: 3,
+              }}
+            >
+              {/* Left side - Course Info */}
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="h5"
+                  component="div"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  Course ID: {course_id}
                 </Typography>
+                <Typography variant="h5" component="div">
+                  Course Name: {courseDetails.course_name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Address: {courseDetails.address}
+                </Typography>
+              </Box>
+
+              {/* Right side - Ratings */}
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h6">Ratings</Typography>
+                {selectedTee ? (
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      gutterBottom
+                    >
+                      {selectedTee.tee_name} Tees ({selectedTee.gender}) -{" "}
+                      {selectedTee.total_yards} yards
+                    </Typography>
+                    <Typography variant="body1">
+                      Course Rating: {selectedTee.course_rating}
+                    </Typography>
+                    <Typography variant="body1">
+                      Slope Rating: {selectedTee.slope_rating}
+                    </Typography>
+                    <Typography variant="body1">
+                      Bogey Rating: {selectedTee.bogey_rating}
+                    </Typography>
+                    <Typography variant="body1">
+                      Par: {selectedTee.par_total}
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Select a tee below to view ratings
+                  </Typography>
+                )}
+              </Box>
+              
+              {/* Only show Play Course button if user is logged in */}
+              {user && (
+                <Box>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    sx={{ marginTop: 2, marginLeft: 1 }}
+                    component={Link}
+                    to={`/play-round/${course_id}`}
+                  >
+                    Play Course
+                  </Button>
+                </Box>
               )}
             </Box>
-            <Box>
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{ marginTop: 2, marginLeft: 1 }}
-                component={Link}
-                to={`/play-round/${course_id}`}
-              >
-                Play Course
-              </Button>
-            </Box>
+          </Box>
+          
+          <Box mt={3}>
+            <GolfScorecard
+              courseData={{ ...courseDetails, tee_sets: filteredTeeSets }}
+              readOnly={true}
+              onTeeChange={handleTeeChange}
+            />
+          </Box>
+          
+          {/* Course Location */}
+          <Box mt={3}>
+            <Typography variant="h6">Course Location:</Typography>
+            {courseDetails.latitude && courseDetails.longitude ? (
+              <Typography variant="body2">
+                Coordinates: {courseDetails.latitude}, {courseDetails.longitude}
+              </Typography>
+            ) : (
+              <Typography variant="body2">
+                Location coordinates not available
+              </Typography>
+            )}
           </Box>
         </Box>
-        <Box mt={3}>
-          <GolfScorecard
-            courseData={{ ...courseDetails, tee_sets: filteredTeeSets }}
-            readOnly={true}
-            onTeeChange={handleTeeChange}
-          />
-        </Box>
-        {/* Mapbox map will be rendered here */}
-        <Box mt={3}>
-          <Typography variant="h6">Course Location:</Typography>
-          {courseDetails.latitude && courseDetails.longitude ? (
-            <Typography variant="body2">
-              Coordinates: {courseDetails.latitude}, {courseDetails.longitude}
-            </Typography>
-          ) : (
-            <Typography variant="body2">
-              Location coordinates not available
-            </Typography>
-          )}
-        </Box>
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 }
 

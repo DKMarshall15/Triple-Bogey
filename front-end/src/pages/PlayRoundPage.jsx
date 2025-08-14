@@ -11,10 +11,12 @@ import {
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import PlayRoundCard from "../components/PlayRoundCard";
-import { fetchCourseDetails } from "./utilities";
+import { fetchCourseDetails, createScorecard } from "./utilities"; // Make sure createScorecard is imported!
+import bgimg from "../assets/images/putting.jpg";
+import CourseNotes from "../components/CourseNotes.jsx";
 
 export default function PlayRoundPage() {
-  const { course_id } = useParams(); // Changed from courseId to course_id
+  const { course_id } = useParams();
   const navigate = useNavigate();
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,9 +26,9 @@ export default function PlayRoundPage() {
     const fetchCourseData = async () => {
       try {
         setLoading(true);
-        console.log("Fetching course with ID:", course_id); // Debug log
+        console.log("Fetching course with ID:", course_id);
         const data = await fetchCourseDetails(course_id);
-        console.log("Course data received:", data); // Debug log
+        console.log("Course data received:", data);
         setCourseData(data);
       } catch (err) {
         console.error("Error fetching course details:", err);
@@ -45,107 +47,171 @@ export default function PlayRoundPage() {
     }
   }, [course_id]);
 
-  const handleRoundComplete = (result) => {
-    navigate("/courses", {
-      state: {
-        message: "Round saved successfully!",
-        roundData: result,
-      },
-    });
+  // Handle scorecard submission - this is where you create the scorecard
+  const handleRoundComplete = async (roundData) => {
+    try {
+      // Create scorecard with the submitted scores
+      const newScorecard = await createScorecard(course_id, roundData);
+
+      navigate("/courses", {
+        state: {
+          message: "Round saved successfully!",
+          roundData: newScorecard,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to save scorecard:", error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const handleBackToCourse = () => {
-    navigate(`/coursedetails/${course_id}`); // Updated to match your route pattern
+    navigate(`/coursedetails/${course_id}`);
   };
 
   if (loading) {
     return (
-      <Container maxWidth="lg">
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          minHeight="60vh"
-        >
-          <CircularProgress />
-          <Typography variant="body1" sx={{ ml: 2 }}>
-            Loading course details...
-          </Typography>
-        </Box>
-      </Container>
+      <Box
+        sx={{
+          backgroundImage: `url(${bgimg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight="60vh"
+          >
+            <CircularProgress />
+            <Typography variant="body1" sx={{ ml: 2 }}>
+              Loading course details...
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg">
-        <Box mt={4}>
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBack />}
-            onClick={() => navigate("/courses")}
-          >
-            Back to Courses
-          </Button>
-        </Box>
-      </Container>
+      <Box
+        sx={{
+          backgroundImage: `url(${bgimg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box mt={4}>
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBack />}
+              onClick={() => navigate("/courses")}
+            >
+              Back to Courses
+            </Button>
+          </Box>
+        </Container>
+      </Box>
     );
   }
 
   if (!courseData) {
     return (
-      <Container maxWidth="lg">
-        <Box mt={4}>
-          <Alert severity="warning">Course not found</Alert>
-        </Box>
-      </Container>
+      <Box
+        sx={{
+          backgroundImage: `url(${bgimg})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box mt={4}>
+            <Alert severity="warning">Course not found</Alert>
+          </Box>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg">
-      <Box mt={2} mb={4}>
-        {/* Header with back button */}
-        <Box display="flex" alignItems="center" mb={3}>
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBack />}
-            onClick={handleBackToCourse}
-            sx={{ mr: 2 }}
-          >
-            Back to Course Details
-          </Button>
-          <Typography variant="h4" component="h1">
-            Play Round
-          </Typography>
-        </Box>
-
-        {/* Course Info Card */}
-        <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            {courseData.course_name}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {courseData.location}
-          </Typography>
-          {courseData.description && (
-            <Typography variant="body2" sx={{ mt: 1 }}>
-              {courseData.description}
+    <Box
+      sx={{
+        backgroundImage: `url(${bgimg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        padding: "20px",
+      }}
+    >
+      <Container
+        maxWidth="lg"
+        sx={{
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          borderRadius: "8px",
+          padding: "20px",
+        }}
+      >
+        <Box mt={2} mb={4}>
+          {/* Header with back button */}
+          <Box display="flex" alignItems="center" mb={3}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBack />}
+              onClick={handleBackToCourse}
+              sx={{ mr: 2 }}
+            >
+              Back to Course Details
+            </Button>
+            <Typography variant="h4" component="h1">
+              Play Round
             </Typography>
-          )}
-        </Paper>
+          </Box>
 
-        {/* Scorecard Component */}
-        <Paper elevation={3}>
-          <PlayRoundCard
-            courseData={courseData}
-            onRoundComplete={handleRoundComplete}
-          />
-        </Paper>
-      </Box>
-    </Container>
+          {/* Scorecard Component */}
+          <Paper elevation={3}>
+            <PlayRoundCard
+              courseData={courseData}
+              onRoundComplete={handleRoundComplete}
+            />
+          </Paper>
+
+          {/* Course notes */}
+          <CourseNotes course={courseData} />
+          <Box mt={3}>
+            <Typography variant="h6">Course Location:</Typography>
+            {courseData.latitude && courseData.longitude ? (
+              <>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  Coordinates: {courseData.latitude}, {courseData.longitude}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body2">
+                Location coordinates not available
+              </Typography>
+            )}
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }
