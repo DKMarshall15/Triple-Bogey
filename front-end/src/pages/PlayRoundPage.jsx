@@ -14,6 +14,7 @@ import PlayRoundCard from "../components/PlayRoundCard";
 import { fetchCourseDetails, createScorecard } from "./utilities"; // Make sure createScorecard is imported!
 import bgimg from "../assets/images/putting.jpg";
 import CourseNotes from "../components/CourseNotes.jsx";
+import MapboxExample from "../components/GolfMap.jsx";
 
 export default function PlayRoundPage() {
   const { course_id } = useParams();
@@ -199,11 +200,11 @@ export default function PlayRoundPage() {
           <Box mt={3}>
             <Typography variant="h6">Course Location:</Typography>
             {courseData.latitude && courseData.longitude ? (
-              <>
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                  Coordinates: {courseData.latitude}, {courseData.longitude}
-                </Typography>
-              </>
+              <MapboxExample 
+            latitude={courseData.latitude}
+            longitude={courseData.longitude}
+            courseName={courseData.course_name}
+          />
             ) : (
               <Typography variant="body2">
                 Location coordinates not available

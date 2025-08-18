@@ -14,6 +14,7 @@ import { ArrowBack } from "@mui/icons-material"; // Add ArrowBack icon
 import { fetchCourseDetails } from "./utilities";
 import GolfScorecard from "../components/ScorecardCard.jsx";
 import bgimg from "../assets/images/fairway.jpg";
+import MapboxExample from "../components/GolfMap.jsx";
 
 function CourseDetailsPage() {
   const { course_id } = useParams();
@@ -25,11 +26,12 @@ function CourseDetailsPage() {
   const [error, setError] = useState(null);
   const [selectedTee, setSelectedTee] = useState(null);
 
+  
   // Add back to courses handler
   const handleBackToCourses = () => {
     navigate("/courses");
   };
-
+  
   // Filter tee sets based on user gender
   const getFilteredTeeSets = (teeSets) => {
     if (
@@ -41,20 +43,23 @@ function CourseDetailsPage() {
       // Show all tee sets for users with no gender, 'other', or 'unknown'
       return teeSets;
     }
-
+    
     // Filter tee sets to match user's gender
     return teeSets.filter((teeSet) => teeSet.gender === user.gender);
   };
-
+  
   const filteredTeeSets = courseDetails
-    ? getFilteredTeeSets(courseDetails.tee_sets)
-    : [];
-
+  ? getFilteredTeeSets(courseDetails.tee_sets)
+  : [];
+  
   // Add callback function to handle tee selection
   const handleTeeChange = (teeData) => {
     setSelectedTee(teeData);
   };
 
+// Add null check before accessing courseDetails properties
+console.log('Course coordinates:', courseDetails?.latitude, courseDetails?.longitude);
+  
   useEffect(() => {
     const getCourseDetails = async () => {
       console.log("course_id from useParams:", course_id); // Debug line
@@ -72,7 +77,7 @@ function CourseDetailsPage() {
         setLoading(false);
       }
     };
-
+    
     if (course_id) {
       getCourseDetails();
     } else {
@@ -81,20 +86,20 @@ function CourseDetailsPage() {
       setError("No course ID provided");
     }
   }, [course_id]);
-
+  
   if (loading) {
     return (
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="400px"
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      minHeight="400px"
       >
         <CircularProgress />
       </Box>
     );
   }
-
+  
   if (error) {
     return (
       <Box p={2}>
@@ -102,7 +107,7 @@ function CourseDetailsPage() {
       </Box>
     );
   }
-
+  
   if (!courseDetails) {
     return (
       <Box p={2}>
@@ -227,15 +232,18 @@ function CourseDetailsPage() {
           <Box mt={3}>
             <Typography variant="h6">Course Location:</Typography>
             {courseDetails.latitude && courseDetails.longitude ? (
-              <Typography variant="body2">
-                Coordinates: {courseDetails.latitude}, {courseDetails.longitude}
-              </Typography>
+              <MapboxExample 
+            latitude={courseDetails.latitude}
+            longitude={courseDetails.longitude}
+            courseName={courseDetails.course_name}
+          />
             ) : (
               <Typography variant="body2">
                 Location coordinates not available
               </Typography>
             )}
           </Box>
+          
         </Box>
       </Container>
     </Box>
