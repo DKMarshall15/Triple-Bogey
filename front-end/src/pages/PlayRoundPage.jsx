@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useOutletContext } from "react-router-dom";
 import {
   Box,
   Container,
@@ -19,9 +19,28 @@ import MapboxExample from "../components/GolfMap.jsx";
 export default function PlayRoundPage() {
   const { course_id } = useParams();
   const navigate = useNavigate();
+  const { contextObj } = useOutletContext();
+  const { user } = contextObj;
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const getFilteredTeeSets = (teeSets) => {
+    if (
+      !user ||
+      !user.gender ||
+      user.gender === "other" ||
+      user.gender === "unknown"
+    ) {
+      return teeSets;
+    }
+    
+    return teeSets.filter((teeSet) => teeSet.gender === user.gender);
+  };
+
+  const filteredTeeSets = courseData
+    ? getFilteredTeeSets(courseData.tee_sets)
+    : [];
 
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -48,13 +67,14 @@ export default function PlayRoundPage() {
     }
   }, [course_id]);
 
-  // Handle scorecard submission - this is where you create the scorecard
   const handleRoundComplete = async (roundData) => {
     try {
-      // Create scorecard with the submitted scores
+      console.log("Round data being saved:", roundData); // Add this debug log
+      console.log("Selected tee in round data:", roundData.selectedTee); // Check the tee info
+    
       const newScorecard = await createScorecard(course_id, roundData);
 
-      navigate("/courses", {
+      navigate("/scorecards", {
         state: {
           message: "Round saved successfully!",
           roundData: newScorecard,
@@ -62,7 +82,6 @@ export default function PlayRoundPage() {
       });
     } catch (error) {
       console.error("Failed to save scorecard:", error);
-      // You might want to show an error message to the user here
     }
   };
 
@@ -187,10 +206,10 @@ export default function PlayRoundPage() {
             </Typography>
           </Box>
 
-          {/* Scorecard Component */}
+          {/* Scorecard Component - Pass filtered course data */}
           <Paper elevation={3}>
             <PlayRoundCard
-              courseData={courseData}
+              courseData={{ ...courseData, tee_sets: filteredTeeSets }}
               onRoundComplete={handleRoundComplete}
             />
           </Paper>

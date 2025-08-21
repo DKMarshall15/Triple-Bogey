@@ -29,6 +29,7 @@ class TeeSetSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeeSet
         fields = [
+            "id",  # Add this line!
             "tee_name",
             "gender",
             "course_rating",

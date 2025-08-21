@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  Grid, 
-  Card, 
-  CardContent, 
+import { useOutletContext } from "react-router-dom"; // Add this import
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Card,
+  CardContent,
   CircularProgress,
   IconButton,
   Dialog,
@@ -17,15 +18,17 @@ import {
   Alert
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
-import { 
-  fetchAllUserScorecards, 
-  fetchSingleScorecard, 
-  updateScoreEntry, 
-  deleteScorecard 
+import {
+  fetchAllUserScorecards,
+  fetchSingleScorecard,
+  updateScoreEntry,
+  deleteScorecard
 } from "./utilities.jsx";
 import bgimg from "../assets/images/fairway.jpg";
 
 function ScorecardsPage() {
+  const { contextObj } = useOutletContext(); // Add this line
+  const { user } = contextObj; // Add this line
   const [scorecards, setScorecards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,21 +62,21 @@ function ScorecardsPage() {
     try {
       console.log("Editing scorecard:", scorecard); // This should show the scorecard object
       console.log("Scorecard ID:", scorecard.id); // Check if ID exists
-      
+
       if (!scorecard.id) {
         throw new Error("Scorecard ID is missing");
       }
-      
+
       // Fetch full scorecard details with entries
       const fullScorecard = await fetchSingleScorecard(scorecard.id);
       console.log("Full scorecard data:", fullScorecard);
-      
+
       if (!fullScorecard || !fullScorecard.entries) {
         throw new Error("Invalid scorecard data received");
       }
-      
+
       setEditingScorecard(fullScorecard);
-      
+
       // Initialize edited scores with current values
       const initialScores = {};
       fullScorecard.entries.forEach(entry => {
@@ -93,7 +96,7 @@ function ScorecardsPage() {
       for (const [entryId, strokes] of Object.entries(editedScores)) {
         await updateScoreEntry(entryId, strokes);
       }
-      
+
       setEditDialogOpen(false);
       setEditingScorecard(null);
       setEditedScores({});
@@ -123,6 +126,20 @@ function ScorecardsPage() {
     }));
   };
 
+  // Add the same filtering function from other pages
+  const getFilteredTeeSets = (teeSets) => {
+    if (
+      !user ||
+      !user.gender ||
+      user.gender === "other" ||
+      user.gender === "unknown"
+    ) {
+      return teeSets;
+    }
+
+    return teeSets.filter((teeSet) => teeSet.gender === user.gender);
+  };
+
   if (loading) {
     return (
       <Box
@@ -135,10 +152,10 @@ function ScorecardsPage() {
         }}
       >
         <Container>
-          <Box 
-            display="flex" 
-            justifyContent="center" 
-            alignItems="center" 
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
             minHeight="400px"
             flexDirection="column"
             gap={2}
@@ -184,7 +201,7 @@ function ScorecardsPage() {
         <Typography variant="h4" sx={{ mt: 4, mb: 2 }}>
           My Scorecards
         </Typography>
-        
+
         {scorecards.length === 0 ? (
           <Typography variant="h6" color="text.secondary">
             No scorecards yet. Play a round to get started!
@@ -237,8 +254,8 @@ function ScorecardsPage() {
         )}
 
         {/* Edit Dialog */}
-        <Dialog 
-          open={editDialogOpen} 
+        <Dialog
+          open={editDialogOpen}
           onClose={() => setEditDialogOpen(false)}
           maxWidth="md"
           fullWidth
@@ -276,15 +293,15 @@ function ScorecardsPage() {
           <DialogTitle>Delete Scorecard</DialogTitle>
           <DialogContent>
             <Typography>
-              Are you sure you want to delete this scorecard for {scorecardToDelete?.course.course_name}? 
+              Are you sure you want to delete this scorecard for {scorecardToDelete?.course.course_name}?
               This action cannot be undone.
             </Typography>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-            <Button 
-              onClick={handleDeleteScorecard} 
-              color="error" 
+            <Button
+              onClick={handleDeleteScorecard}
+              color="error"
               variant="contained"
             >
               Delete

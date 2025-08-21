@@ -32,16 +32,26 @@ export default function PlayRoundCard({ courseData, onRoundComplete }) {
   );
 
   const handleSubmitRound = () => {
+    console.log("Full selectedTee object:", selectedTee);
+    console.log("Available properties:", Object.keys(selectedTee));
+    console.log("selectedTee.id:", selectedTee.id);
+    console.log("selectedTee.tee_set_id:", selectedTee.tee_set_id);
+    console.log("selectedTee.pk:", selectedTee.pk);
+
     const scoresData = selectedTee.holes.map((hole) => ({
       hole_number: hole.hole_number,
       strokes: scores[hole.hole_number] || 0,
       par: hole.par,
     }));
 
-    // Pass both scores and tee set info
+    // Try different possible ID properties
+    const teeSetId = selectedTee.id || selectedTee.tee_set_id || selectedTee.pk;
+    console.log("Final teeSetId being sent:", teeSetId);
+
     onRoundComplete({
       scores: scoresData,
-      tee_set_id: selectedTee.id, // Add this
+      tee_set_id: teeSetId,
+      selectedTee: selectedTee,
     });
   };
 
