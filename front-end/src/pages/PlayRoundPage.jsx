@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import PlayRoundCard from "../components/PlayRoundCard";
-import { fetchCourseDetails, createScorecard } from "./utilities"; // Make sure createScorecard is imported!
+import { fetchCourseDetails, createScorecard } from "./utilities"; 
 import bgimg from "../assets/images/putting.jpg";
 import CourseNotes from "../components/CourseNotes.jsx";
 import MapboxExample from "../components/GolfMap.jsx";

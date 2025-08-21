@@ -3,21 +3,18 @@ import {
   Box,
   Pagination,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Button,
   CircularProgress,
 } from "@mui/material";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
-import { Link, useOutletContext } from "react-router-dom"; // Add useOutletContext
+import { Link, useOutletContext } from "react-router-dom"; 
 import CourseCard from "../components/CourseCard.jsx";
 import TextField from "@mui/material/TextField";
 import Grid from "@mui/material/Grid";
 import bgimg from "../assets/images/fairway.jpg";
+import WeatherBanner from "../components/Weather.jsx";
 
 function CoursesPage() {
   // Get user from context
@@ -26,7 +23,6 @@ function CoursesPage() {
 
   const [courses, setCourses] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState("none");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true); // Add loading state
   const [searchLoading, setSearchLoading] = useState(false); // Add search loading state
@@ -34,44 +30,17 @@ function CoursesPage() {
   // Number of courses to display per page
   const coursesPerPage = 12;
 
-  // Sort courses based on selected option
-  const getSortedCourses = () => {
-    const coursesCopy = [...courses];
-    switch (sortOrder) {
-      case "courseId-asc":
-        return coursesCopy.sort(
-          (a, b) => parseInt(a.course_id) - parseInt(b.course_id)
-        );
-      case "courseId-desc":
-        return coursesCopy.sort(
-          (a, b) => parseInt(b.course_id) - parseInt(a.course_id)
-        );
-      case "none":
-      default:
-        return coursesCopy;
-    }
-  };
-
-  const sortedCourses = getSortedCourses();
-
-  // Calculate pagination values using sorted courses
-  const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
+  // Calculate pagination values
+  const totalPages = Math.ceil(courses.length / coursesPerPage);
   const startIndex = (currentPage - 1) * coursesPerPage;
   const endIndex = startIndex + coursesPerPage;
-  const currentCourses = sortedCourses.slice(startIndex, endIndex);
+  const currentCourses = courses.slice(startIndex, endIndex);
 
   // Handle page change
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
     // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // Handle sort change
-  const handleSortChange = (event) => {
-    setSortOrder(event.target.value);
-    // Reset to first page when sorting changes
-    setCurrentPage(1);
   };
 
   // handle search functionality
@@ -164,12 +133,13 @@ function CoursesPage() {
           py: 4,
         }}
       >
+        <WeatherBanner />
         {/* Search bar */}
-        <Typography variant="h4" align="left" sx={{ pt: 0, mb: 2 }}>
+        <Typography variant="h4" align="left" sx={{ pt: 0, my: 2 }}>
           Search for a Course:
         </Typography>
-        <Typography variant="body1" color="initial">
-          You can try your city name but it only searches course names.
+        <Typography variant="body1" color="initial" sx={{ mb: 2 }}>
+          (You can try your city name but it only searches course names.)
         </Typography>
         <Box
           sx={{
@@ -209,36 +179,11 @@ function CoursesPage() {
           </Button>
         </Box>
 
-        {/* Sort controls */}
-        <Box
-          sx={{
-            mb: 3,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="sort-select-label">Sort by</InputLabel>
-            <Select
-              labelId="sort-select-label"
-              id="sort-select"
-              value={sortOrder}
-              label="Sort by"
-              onChange={handleSortChange}
-            >
-              <MenuItem value="none">Default Order</MenuItem>
-              <MenuItem value="courseId-asc">Course ID (Low to High)</MenuItem>
-              <MenuItem value="courseId-desc">Course ID (High to Low)</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
         {/* Display current page info */}
         <Box sx={{ mb: 2 }}>
           <Typography variant="body1" color="text.secondary">
-            Showing {startIndex + 1}-{Math.min(endIndex, sortedCourses.length)}{" "}
-            of {sortedCourses.length} courses
+            Showing {startIndex + 1}-{Math.min(endIndex, courses.length)}{" "}
+            of {courses.length} courses
           </Typography>
         </Box>
 

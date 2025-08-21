@@ -15,6 +15,8 @@ import { fetchCourseDetails } from "./utilities";
 import GolfScorecard from "../components/ScorecardCard.jsx";
 import bgimg from "../assets/images/fairway.jpg";
 import MapboxExample from "../components/GolfMap.jsx";
+import WeatherBanner from "../components/Weather.jsx"; // Update import to use WeatherBanner
+
 
 function CourseDetailsPage() {
   const { course_id } = useParams();
@@ -56,11 +58,9 @@ function CourseDetailsPage() {
   const handleTeeChange = (teeData) => {
     setSelectedTee(teeData);
   };
-
-// Add null check before accessing courseDetails properties
-console.log('Course coordinates:', courseDetails?.latitude, courseDetails?.longitude);
   
-  useEffect(() => {
+
+useEffect(() => {
     const getCourseDetails = async () => {
       console.log("course_id from useParams:", course_id); // Debug line
       try {
@@ -69,6 +69,7 @@ console.log('Course coordinates:', courseDetails?.latitude, courseDetails?.longi
         console.log("Calling fetchCourseDetails with:", course_id); // Debug line
         const details = await fetchCourseDetails(course_id);
         console.log("Received course details:", details); // Debug line
+        console.log('Course coordinates:', details?.latitude, details?.longitude); // Move it here
         setCourseDetails(details);
       } catch (err) {
         setError("Failed to load course details");
@@ -86,6 +87,8 @@ console.log('Course coordinates:', courseDetails?.latitude, courseDetails?.longi
       setError("No course ID provided");
     }
   }, [course_id]);
+
+  
   
   if (loading) {
     return (
@@ -128,6 +131,13 @@ console.log('Course coordinates:', courseDetails?.latitude, courseDetails?.longi
     >
       <Container>
         <Box p={2} sx={{ backgroundColor: "rgba(255, 255, 255, 0.8)", borderRadius: 2 }}>
+          {/* Use course coordinates if available, otherwise fallback to user location */}
+          <WeatherBanner 
+            lat={courseDetails?.latitude} 
+            lon={courseDetails?.longitude}
+            locationName={courseDetails?.course_name}
+          />
+          
           {/* Header with back button */}
           <Box display="flex" alignItems="center" mb={3}>
             <Button

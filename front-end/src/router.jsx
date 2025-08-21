@@ -18,7 +18,7 @@ const router = createBrowserRouter([
         element: <App />,
         loader: userConfirmation, // Assuming you have a userConfirmation function to check user authentication
         children: [
-            // Define child routes here if needed
+            
             {
                 index: true, // This will render the default component when the path is "/"
                 element: <HomePage />, // Default component to render
