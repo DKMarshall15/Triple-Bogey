@@ -4,13 +4,16 @@ from course_api_app.models import Course, TeeSet, TeeHole
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 
+def get_current_date():
+    return timezone.now().date()
+
 # Create your models here.
 class Scorecard(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='scorecards')
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     tee_set = models.ForeignKey(TeeSet, on_delete=models.CASCADE)
 
-    date_played = models.DateField(default=timezone.now) # Default to current date (i.e 2025-08-06)
+    date_played = models.DateField(default=get_current_date)  # Use function reference
 
     def __str__(self):
         return f"Scorecard for {self.user} at {self.course} on {self.date_played}"

@@ -7,44 +7,12 @@ from .serializers import CourseReviewSerializer
 from user_app.views import UserAuth
 
 # Create your views here.
-class AllCourseReviewsView(UserAuth):
+class AllCourseNotesView(UserAuth):  # Renamed from AllCourseReviewsView
     def get(self, request):
         user = request.user
-        reviews = CourseReview.objects.filter(user=user)
-        serializer = CourseReviewSerializer(reviews, many=True)
+        notes = CourseReview.objects.filter(user=user)  # Still uses CourseReview model
+        serializer = CourseReviewSerializer(notes, many=True)
         return Response(serializer.data, status=200)
-
-class CourseReviewView(UserAuth):
-
-    def get(self, request, course_id):
-        try:
-            course = Course.objects.get(course_id=course_id)
-            reviews = CourseReview.objects.filter(course=course)
-            serializer = CourseReviewSerializer(reviews, many=True)
-            return Response(serializer.data, status=200)
-        except Course.DoesNotExist:
-            return Response({"error": "Course not found"}, status=404)
-
-    def post(self, request, course_id):
-        course = get_object_or_404(Course, course_id=course_id)
-        serializer = CourseReviewSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user, course=course)
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-
-    def put(self, request, review_id):
-        review = get_object_or_404(CourseReview, id=review_id, user=request.user)
-        serializer = CourseReviewSerializer(review, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
-
-    def delete(self, request, review_id):
-        review = get_object_or_404(CourseReview, id=review_id, user=request.user)
-        review.delete()
-        return Response(status=204)
 
 class CourseFavoriteView(UserAuth):
     def get(self, request):
@@ -71,7 +39,7 @@ class CourseFavoriteView(UserAuth):
                     user=request.user,
                     course=course,
                     is_favorite=True,
-                    # Only set required fields, leave review fields empty/null if allowed
+                    comment=None,  # Explicitly set comment to None
                 )
                 created = True
             
@@ -98,3 +66,46 @@ class CourseFavoriteView(UserAuth):
             
         except (Course.DoesNotExist, CourseReview.DoesNotExist):
             return Response({"error": "Course or review not found"}, status=404)
+
+class CourseNotesView(UserAuth):  # Rename for clarity
+    
+    def get(self, request, course_id):
+        try:
+            course = Course.objects.get(course_id=course_id)
+            note = CourseReview.objects.filter(course=course, user=request.user).first()
+            if note:
+                serializer = CourseReviewSerializer(note)
+                return Response(serializer.data, status=200)
+            else:
+                return Response({"message": "No notes found"}, status=404)
+        except Course.DoesNotExist:
+            return Response({"error": "Course not found"}, status=404)
+
+    def post(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        
+        # Check if note already exists for this user/course
+        existing_note = CourseReview.objects.filter(course=course, user=request.user).first()
+        if existing_note:
+            return Response({"error": "Notes already exist for this course. Use PUT to update."}, status=400)
+        
+        serializer = CourseReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user, course=course)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+    def put(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        note = get_object_or_404(CourseReview, course=course, user=request.user)
+        serializer = CourseReviewSerializer(note, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
+
+    def delete(self, request, course_id):
+        course = get_object_or_404(Course, course_id=course_id)
+        note = get_object_or_404(CourseReview, course=course, user=request.user)
+        note.delete()
+        return Response(status=204)

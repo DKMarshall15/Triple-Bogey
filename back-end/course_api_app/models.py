@@ -7,12 +7,12 @@ class Course(models.Model):
     course_id = models.BigIntegerField(unique=True)
     club_name = models.CharField(max_length=255)
     course_name = models.CharField(max_length=255)
-    address = models.CharField(max_length=255)
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
+    address = models.CharField(max_length=255, default="No Data", null=True, blank=True)
+    city = models.CharField(max_length=100, default=None, null=True, blank=True)
+    state = models.CharField(max_length=100, default=None, null=True, blank=True)
+    country = models.CharField(max_length=100, default=None, null=True, blank=True)
+    latitude = models.FloatField(default=None, null=True, blank=True)
+    longitude = models.FloatField(default=None, null=True, blank=True)
 
     def __str__(self):
         return f"{self.course_id} - {self.club_name} - {self.course_name}"

@@ -9,7 +9,7 @@ class ScoreEntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ScoreEntry
-        fields = ["tee_hole", "strokes"]
+        fields = ["id", "tee_hole", "strokes"]
 
 
 class ScorecardSerializer(serializers.ModelSerializer):
@@ -22,6 +22,7 @@ class ScorecardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scorecard
         fields = [
+            "id",
             "user",
             "course",
             "tee_set",
